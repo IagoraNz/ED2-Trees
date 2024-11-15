@@ -14,11 +14,11 @@
 
 /* (pré-itens) funções necessárias para que os itens i, ii, iii e iv possam ocorrer */
 
-Arv23PT *criaNo(Info informacao, Arv23PT *filhoesq, Arv23PT *filhocen){
+Arv23PT *criaNo(Info *informacao, Arv23PT *filhoesq, Arv23PT *filhocen){
     Arv23PT *no;
     no = (Arv23PT*)malloc(sizeof(Arv23PT));
 
-    no->info1 = informacao;
+    no->info1 = *informacao;
     no->esq = filhoesq;
     no->cen = filhocen;
     no->ninfos = 1;
@@ -26,12 +26,50 @@ Arv23PT *criaNo(Info informacao, Arv23PT *filhoesq, Arv23PT *filhocen){
     return no;
 }
 
+Arv23PT *adicionaChave(Arv23PT *no, Info *informacao, Arv23PT *filho){
+    if(strcmp(informacao->palavra, no->info1.palavra) > 0){
+        no->info2 = *informacao;
+        no->dir = filho;
+    }
+    else{
+        no->info2 = no->info1;
+        no->dir = no->cen;
+        no->info1 = *informacao;
+        no->cen = filho;
+    }
+    no->ninfos = 2;
+
+    return no;
+}
+
+Arv23PT *quebraNo(Arv23PT **no, Info *informacao, Info *promove, Arv23PT **filho){
+    Arv23PT *maior;
+
+    if(strcmp(informacao->palavra, (*no)->info2.palavra) > 0){
+        *promove = (*no)->info2;
+        maior = criaNo(informacao, (*no)->dir, filho);
+    }
+    else if(strcmp(informacao->palavra, (*no)->info1.palavra) < 0){
+        *promove = *informacao;
+        maior = criaNo(&(*no)->info2, filho, (*no)->dir);
+    }
+    else{
+        *promove = (*no)->info1;
+        maior = criaNo(&(*no)->info2, (*no)->cen, (*no)->cen);
+        (*no)->info1 = *informacao;
+        (*no)->cen = filho;
+    }
+    (*no)->ninfos = 1;
+
+    return maior;
+}
+
 int ehFolha(Arv23PT *no){
     /* Basta verificar se a esquerda é NULL */
     return (no->esq == NULL) ? 1 : 0;
 }
 
-Arv23PT *inserirArv23(Arv23PT **no, Info informacao, Info *promove, Arv23PT **pai){
+Arv23PT *inserirArv23(Arv23PT **no, Info *informacao, Info *promove, Arv23PT **pai){
     Info promove1;
     Arv23PT *maiorNo;
     maiorNo = NULL;
@@ -45,7 +83,7 @@ Arv23PT *inserirArv23(Arv23PT **no, Info informacao, Info *promove, Arv23PT **pa
             else{
                 maiorNo = quebraNo(no, informacao, promove, NULL);
                 if(*pai == NULL){
-                    *no = criaNo(*promove, *no, maiorNo);
+                    *no = criaNo(promove, *no, maiorNo);
                     maiorNo == NULL;
                 }
             }
@@ -64,13 +102,13 @@ Arv23PT *inserirArv23(Arv23PT **no, Info informacao, Info *promove, Arv23PT **pa
 
         if(maiorNo){
             if((*no)->ninfos == 1){
-                *no = adicionaChave(*no, *promove, maiorNo);
+                *no = adicionaChave(*no, promove, maiorNo);
                 maiorNo = NULL;
             }
             else{
-                maiorNo = quebraNo(no, *promove, &promove1, maiorNo);
+                maiorNo = quebraNo(no, promove, &promove1, maiorNo);
                 if(*pai){
-                    *no = criaNo(promove1, *no, maiorNo);
+                    *no = criaNo(&promove1, *no, maiorNo);
                     maiorNo = NULL;
                 }
             }
