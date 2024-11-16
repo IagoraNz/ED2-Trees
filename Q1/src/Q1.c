@@ -137,9 +137,82 @@ português dada, independente da unidade */
 
 /*-----------------------------------------------------------------------------------------------------*/
 
-/* (iii) informar uma palavra em inglês e a unidade a qual a mesma pertence removÊ-la das árvores binárias
+/* (iii) informar uma palavra em inglês e a unidade a qual a mesma pertence removê-la das árvores binárias
 das quais ela pertence. Caso ela seja a única palavra em uma das árvores binárias, remover também da
 árvore 2-3 */
+
+int ehFolha(Arv23PT *no){
+    int aux = 0;
+    if(no->esq == NULL)
+        aux = 1;
+    return aux;
+}
+
+Arv23PT *menorfilho(Arv23PT *no, Arv23PT **parente) {
+    (*parente) = no;
+    while(no->esq != NULL) {
+        (*parente) = no;
+        no = no->esq;
+    }
+
+    return no;
+}
+
+int removerArv23(Arv23PT **raiz, const Info *info, Arv23PT **pai){
+    int removeu = 0;
+    Arv23PT *paiaux = NULL, *resultado = NULL;
+
+    if((*raiz) != NULL) {
+        if(ehFolha(*raiz)) {
+            if((*raiz)->ninfos == 2) {
+                // Caso 1: remoção em nó folha com 2 infos, onde a palavra a ser removida é a info 2
+                if(strcmp(info->palavra, (*raiz)->info2.palavra) == 0){
+                    (*raiz)->ninfos = 1;
+                    removeu = 1;
+                }
+                // Caso 2: remoção em nó folha com 2 infos, onde a palavra a ser removida é a info 1
+                else if(strcmp(info->palavra, (*raiz)->info1.palavra) == 0) {
+                    (*raiz)->info1 = (*raiz)->info2;
+                    (*raiz)->ninfos = 1;
+                    removeu = 1;
+                }
+            }
+            else if((*raiz)->ninfos == 1) {
+                // Caso 3: remoção em nó folha com 1 info e sem pai
+                if((*pai) == NULL) {
+                    free((*raiz));
+                    (*raiz) = NULL;
+                    removeu = 1;
+                }
+                else if((*pai) != NULL) {
+                    /* Caso 4: remoção em nó folha com 1 info e com um pai, e a info
+                    é o filho da esquerda*/
+                    if((*raiz) == (*pai)->esq){
+                        (*raiz)->info1 = (*pai)->info1;
+                        paiaux = *pai;
+                        resultado = menorfilho((*pai)->cen, &paiaux);
+                        (*pai)->info1 = resultado->info1;
+                        removeu = 1;
+                        /* Caso 4.1: o menor no possui duas infos */
+                        if(resultado->ninfos == 2) {
+                            resultado->info1 = resultado->info2;
+                            resultado->ninfos = 1;
+                        }
+                        /* Caso 4.2: o menor no possui uma info */
+                        else {
+                            /* Caso 4.2.1: o menor no possui uma info e o pai posui ninfos == 2 */
+                            if((*pai)->ninfos == 2) {
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return removeu;
+}
 
 /*-----------------------------------------------------------------------------------------------------*/
 
