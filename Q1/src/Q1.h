@@ -34,5 +34,6 @@ Arv23PT *adicionaChave(Arv23PT *no, const Info *informacao, Arv23PT *filho);
 Arv23PT *quebraNo(Arv23PT **no, const Info *informacao, Info *promove, Arv23PT **filho);
 int ehFolha(const Arv23PT *no);
 Arv23PT *inserirArv23(Arv23PT **no, Info *informacao, Info *promove, Arv23PT **pai);
+void freeTree(Arv23PT *no);
 
 #endif
