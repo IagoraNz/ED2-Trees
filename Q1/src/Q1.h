@@ -21,10 +21,18 @@ typedef struct Arv23pt{
     Info info2;
     struct Arv23pt *cen;
     struct Arv23pt *dir;
-    struct Arv24pt *esq;
+    struct Arv23pt *esq;
     int ninfos;
 } Arv23PT;
 
 /*-----------------------------------------------------------------------------------------------------*/
+
+/* FUNÇÕES ADICIONAIS */
+
+Arv23PT *criaNo(const Info *informacao, Arv23PT *filhoesq, Arv23PT *filhocen);
+Arv23PT *adicionaChave(Arv23PT *no, const Info *informacao, Arv23PT *filho);
+Arv23PT *quebraNo(Arv23PT **no, const Info *informacao, Info *promove, Arv23PT **filho);
+int ehFolha(const Arv23PT *no);
+Arv23PT *inserirArv23(Arv23PT **no, Info *informacao, Info *promove, Arv23PT **pai);
 
 #endif
