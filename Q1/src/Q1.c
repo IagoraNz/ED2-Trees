@@ -105,7 +105,7 @@ Arv23PT *inserirArv23(Arv23PT **no, Info *informacao, Info *promove, Arv23PT **p
             }
             else{
                 maiorNo = quebraNo(no, promove, &promove1, &maiorNo);
-                if(*pai != NULL){
+                if(pai != NULL){
                     *no = criaNo(&promove1, *no, maiorNo);
                     maiorNo = NULL;
                 }
@@ -141,7 +141,7 @@ português dada, independente da unidade */
 das quais ela pertence. Caso ela seja a única palavra em uma das árvores binárias, remover também da
 árvore 2-3 */
 
-int ehFolha(Arv23PT *no){
+int ehFolhaR(const Arv23PT *no){
     int aux = 0;
     if(no->esq == NULL)
         aux = 1;
@@ -160,10 +160,10 @@ Arv23PT *menorfilho(Arv23PT *no, Arv23PT **parente) {
 
 int removerArv23(Arv23PT **raiz, const Info *info, Arv23PT **pai){
     int removeu = 0;
-    Arv23PT *paiaux = NULL, *resultado = NULL;
+    Arv23PT *paiaux = NULL, *paiaux1 = NULL, *raizaux = NULL, *resultado = NULL;
 
     if((*raiz) != NULL) {
-        if(ehFolha(*raiz)) {
+        if(ehFolhaR(*raiz)) {
             if((*raiz)->ninfos == 2) {
                 // Caso 1: remoção em nó folha com 2 infos, onde a palavra a ser removida é a info 2
                 if(strcmp(info->palavra, (*raiz)->info2.palavra) == 0){
@@ -200,9 +200,77 @@ int removerArv23(Arv23PT **raiz, const Info *info, Arv23PT **pai){
                         }
                         /* Caso 4.2: o menor no possui uma info */
                         else {
-                            /* Caso 4.2.1: o menor no possui uma info e o pai posui ninfos == 2 */
+                            /* Caso 4.2.1: o menor no possui uma info e o pai possui ninfos == 2 */
                             if((*pai)->ninfos == 2) {
+                                resultado->info1 = resultado->info2;
+                                resultado->ninfos = 1;
+                            }
+                            else {
+                                /* Caso 4.2.2: o nó pai possui apenas 1 info*/
+                                if(paiaux->ninfos == 1) {
+                                    (*raiz)->info2 = resultado->info1;
+                                    (*raiz)->ninfos = 1;
+                                    free(resultado);
+                                    *pai = *raiz;
+                                }
+                                /* Caso 4.2.3: o nó pai possui apenas 2 infos*/
+                                else {
+                                    resultado->info1 = paiaux->info2;
+                                    paiaux1 = paiaux;
+                                    raizaux = menorfilho(paiaux1->dir, &paiaux1);
+                                    paiaux->info2 = raizaux->info1;
+                                    /* Caso 4.2.3.1: o nó auxiliar possui 2 infos*/
+                                    if(raizaux->ninfos == 2) {
+                                        /* Mesmo movimento da "onda" já visto */
+                                        raizaux->info1 = raizaux->info2;
+                                        raizaux->ninfos == 1;
+                                    }
+                                    /* Caso 4.2.3.2: o nó auxiliar possui 1 info*/
+                                    else {
+                                        resultado->info2 = paiaux->info2;
+                                        resultado->ninfos = 2;
+                                        paiaux->ninfos = 1;
+                                        free(raizaux);
+                                        paiaux->dir = NULL;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    /* Caso 5: remoção em nó folha com 1 info e com um pai, e a info
+                    é o filho do centro*/
+                    else if((*raiz) == (*pai)->cen) {
+                        removeu = 1;
+                        /* Caso 5.1: o pai possui 1 info */
+                        if((*pai)->ninfos == 1) {
+                            /* Caso 5.1.1: o nó à esquerda do pais possui 2 infos*/
+                            if((*pai)->esq->ninfos == 2) {
+                                /* Movimento da onda */
+                                (*raiz)->info1 = (*pai)->info1;
+                                /*
+                                É como se o movimento fosse:
+                                i.
+                                        |---------------|| 100 ||     || (pai)
+                                        |                      |
+                                ||  50  || 90  ||       || 150 ||     || (raiz)
 
+                                ii.
+                                        |---------------||  90  ||     || (pai)
+                                        |                       |
+                                ||  50  ||     ||       || 100 ||     || (raiz)
+                                */
+                                (*pai)->info1 =((*pai)->esq)->info2;
+                                ((*pai)->esq)->ninfos = 1;
+                            }
+                            /* Caso 5.1.2: o nó à esquerda do pais possui 1 info*/
+                            else {
+                                Arv23PT *aux = NULL;
+                                ((*pai)->esq)->info2 = (*pai)->info1;
+                                free(*raiz);
+                                ((*pai)->esq)->ninfos = 2;
+                                aux = (*pai)->esq;
+                                free(*pai);
+                                *pai = aux;
                             }
                         }
                     }
