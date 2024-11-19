@@ -7,13 +7,13 @@
 
 typedef struct ingptbst{
     char *palavra;
+    int unidade;
     struct ingptbst *dir,*esq;
 } IngPTBST;
 
 typedef struct info {
     char *palavra;
     IngPTBST *versaoIng;
-    int unidade;
 } Info;
 
 typedef struct Arv23pt{
@@ -29,12 +29,8 @@ typedef struct Arv23pt{
 
 /* FUNÇÕES ADICIONAIS */
 
-Arv23PT *criaNo(const Info *informacao, Arv23PT *filhoesq, Arv23PT *filhocen);
-Arv23PT *adicionaChave(Arv23PT *no, const Info *informacao, Arv23PT *filho);
-Arv23PT *quebraNo(Arv23PT **no, const Info *informacao, Info *promove, Arv23PT **filho);
-int ehFolha(const Arv23PT *no);
-Arv23PT *inserirArv23(Arv23PT **no, Info *informacao, Info *promove, Arv23PT **pai);
+Arv23PT * criaNo(Info info, Arv23PT * pi, Arv23PT * arv23_pt);
+Arv23PT *inserirArv23(Arv23PT **no, Info informacao, Info *promove, Arv23PT **pai);
 void freeTree(Arv23PT *no);
-int removerArv23(Arv23PT **raiz, const Info *info, Arv23PT **pai);
 
 #endif

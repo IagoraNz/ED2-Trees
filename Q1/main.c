@@ -1,94 +1,54 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "./src/Q1.h"
 
-Info criaInfo(const char *palavra, const int unidade) {
-    Info info;
-    info.versaoIng = NULL;
-    info.palavra = strdup(palavra);
-    info.unidade = unidade;
-    info.versaoIng = (IngPTBST*)malloc(sizeof(IngPTBST));
-    info.versaoIng->esq = NULL;
-    info.versaoIng->dir = NULL;
-    return info;
-}
+void insere(Arv23PT **pi, const Info info) {
+    Info promove;
+    Arv23PT *novoNo = inserirArv23(pi, info, &promove, NULL);
 
-void adicionarTraducaoEmIngles(Info *info, const char *palavraIng) {
-    if(info->versaoIng == NULL){
-        info->versaoIng = (IngPTBST*)malloc(sizeof(IngPTBST));
-        info->versaoIng->esq = NULL;
-        info->versaoIng->dir = NULL;
+    if(novoNo){
+        *pi = criaNo(promove, *pi, novoNo);
     }
-
-    info->versaoIng->palavra = strdup(palavraIng);
 }
 
-void exibir_tree23(const Arv23PT *raiz){
-    if(raiz != NULL){
-        exibir_tree23(raiz->esq);
-        printf("Palavra (PT): %s, Unidade: %d", raiz->info1.palavra, raiz->info1.unidade);
+void exibirEmOrdem(const Arv23PT *ptIn) {
+    if (ptIn) {
+        exibirEmOrdem(ptIn->esq);
 
-        if(raiz->info1.versaoIng != NULL && raiz->info1.versaoIng->palavra != NULL){
-            printf(", Traducao (EN): %s", raiz->info1.versaoIng->palavra);
-            printf("\n");
-        }
+        printf("%s\n", ptIn->info1.palavra);
 
-        // Se houver o segundo elemento (ninfos == 2), exibe o segundo filho
-        if(raiz->ninfos == 2){
-            printf("Palavra (PT): %s, Unidade: %d", raiz->info2.palavra, raiz->info2.unidade);
+        exibirEmOrdem(ptIn->cen);
 
-            // Exibir a tradução em inglês, se houver
-            if(raiz->info2.versaoIng != NULL && raiz->info2.versaoIng->palavra != NULL)
-                printf(", Traducao (EN): %s", raiz->info2.versaoIng->palavra);
-            printf("\n");
-        }
-        exibir_tree23(raiz->cen);
-        if(raiz->ninfos == 2) {
-            exibir_tree23(raiz->dir);
+        if (ptIn->ninfos == 2) {
+            printf("%s\n", ptIn->info2.palavra);
+            exibirEmOrdem(ptIn->dir);
         }
     }
 }
 
-int main(){
-    Arv23PT *raiz = NULL;
+int main() {
+    const Info info1 = {"ola", NULL};
+    const Info info2 = {"zebra", NULL};
+    const Info info3 = {"casa", NULL};
+    const Info info4 = {"abobora", NULL};
+    const Info info5 = {"pera", NULL};
+    const Info info6 = {"uva", NULL};
 
-    Info info2 = criaInfo("gato", 2);
-    adicionarTraducaoEmIngles(&info2, "cat");
+    Arv23PT *pI = NULL; // Inicializa a árvore como vazia
 
-    Info info1 = criaInfo("cachorro", 1);
-    adicionarTraducaoEmIngles(&info1, "dog");
+    // Insere os elementos na árvore
+    insere(&pI, info1);
+    insere(&pI, info2);
+    insere(&pI, info6);
+    insere(&pI, info3);
+    insere(&pI, info4);
+    insere(&pI, info5);
 
-    Info info3 = criaInfo("passarinho", 3);
-    adicionarTraducaoEmIngles(&info3, "bird");
+    // Exibe a árvore em ordem
+    printf("\nArvore em ordem:\n");
+    exibirEmOrdem(pI);
 
-    Info info4 = criaInfo("peixe", 4);
-    adicionarTraducaoEmIngles(&info4, "fish");
-
-    Info info5 = criaInfo("cavalo", 5);
-    adicionarTraducaoEmIngles(&info5, "horse");
-
-    Info promovido;
-    inserirArv23(&raiz, &info1, &promovido, &raiz);
-    printf(("\n\nTESTE 1\n\n"));
-    exibir_tree23(raiz);
-    inserirArv23(&raiz, &info2, &promovido, &raiz);
-    printf(("\n\nTESTE 2\n\n"));
-    exibir_tree23(raiz);
-    inserirArv23(&raiz, &info3, &promovido, &raiz);
-    printf(("\n\nTESTE 3\n\n"));
-    exibir_tree23(raiz);
-    inserirArv23(&raiz, &info4, &promovido, &raiz);
-    printf(("\n\nTESTE 4\n\n"));
-    exibir_tree23(raiz);
-    inserirArv23(&raiz, &info5, &promovido, &raiz);
-    printf(("\n\nTESTE 5\n\n"));
-    exibir_tree23(raiz);
-
-    printf("\nExibindo a arvore 23 com traducoes:\n");
-    exibir_tree23(raiz);
-
-    // freeTree(&raiz);
+    // Libera memória alocada
+    freeTree(pI);
 
     return 0;
 }
