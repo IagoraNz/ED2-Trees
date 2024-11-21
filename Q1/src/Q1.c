@@ -149,6 +149,12 @@ português dada, independente da unidade */
 das quais ela pertence. Caso ela seja a única palavra em uma das árvores binárias, remover também da
 árvore 2-3 */
 
+void onda(const Info info, Info *entrada, const Arv23PT *pai, Arv23PT **fonte, Arv23PT **raiz) {
+    removerArv23(raiz, info.palavra, pai, fonte);
+    if(entrada)
+        *entrada = info;
+}
+
 int ehFolhaR(const Arv23PT *no){
     int aux = 0;
     if(no->esq == NULL)
@@ -156,167 +162,134 @@ int ehFolhaR(const Arv23PT *no){
     return aux;
 }
 
-Arv23PT *menorfilho(Arv23PT *no, Arv23PT **parente) {
-    (*parente) = no;
-    while(no->esq != NULL) {
-        (*parente) = no;
-        no = no->esq;
-    }
+int removivel(const Arv23PT *raiz) {
+    int pode = 0;
 
-    return no;
+    if(raiz != NULL) {
+        pode = raiz->ninfos == 2;
+        if(!pode) {
+            pode = removivel(raiz->cen);
+            if(!pode)
+                pode = removivel(raiz->esq);
+        }
+    }
+    return pode;
 }
 
-int removerArv23(Arv23PT **raiz, const Info *info, Arv23PT **pai) {
+Arv23PT *menorfilho(Arv23PT *no, Arv23PT **pai, Info *res){
+    *pai = no;
+    Arv23PT *filho = no->esq;
+
+    while(filho != NULL && !ehFolhaR(filho)){
+        *pai = filho;
+        filho = filho->esq;
+    }
+    if(filho != NULL)
+        *res = filho->info1;
+
+    return filho;
+}
+
+Arv23PT *maior(const Arv23PT *raiz) {
+    return raiz->ninfos == 2 ? raiz->dir : raiz->cen;
+}
+
+Arv23PT *maiorfilho(Arv23PT *raiz, Arv23PT **pai, Info *maiorinfo) {
+    Arv23PT *filho = maior(raiz);
+    *pai = raiz;
+
+    while(filho != NULL && maior(filho) != NULL) {
+        *pai = filho;
+        filho = maior(filho);
+    }
+    if(filho != NULL)
+        *maiorinfo = filho->ninfos ? filho->info2 : filho->info1;
+
+    return filho;
+}
+
+int ehInfo1(const Arv23PT no, const char *palavra){
+    return strcmp(no.info1.palavra, palavra) == 0;
+}
+
+int ehInfo2(const Arv23PT no, const char *palavra){
+    return strcmp(no.info2.palavra, palavra) == 0;
+}
+
+Arv23PT *buscpai(const Arv23PT *raiz, const char *palavra) {
+    Arv23PT *pai = NULL;
+
+    if(raiz != NULL) {
+        if(!ehInfo1(*raiz, palavra) && !ehInfo2(*raiz, palavra)) {
+            if(strcmp(palavra, raiz->info1.palavra) < 0)
+
+        }
+    }
+}
+
+int removerArv23(Arv23PT **raiz, const char *info, const Arv23PT *pai, Arv23PT **ref) {
     int removeu = 0;
-    Arv23PT *paiaux = NULL, *paiaux1 = NULL, *raizaux = NULL, *resultado = NULL;
 
-    if ((*raiz) != NULL) {
-        if (ehFolhaR(*raiz)) {
-            if ((*raiz)->ninfos == 2) {
-                // Caso 1: remoção em nó folha com 2 infos, onde a palavra a ser removida é a info 2
-                if (strcmp(info->palavra, (*raiz)->info2.palavra) == 0) {
+    if(*raiz != NULL) {
+        const int info1 = ehInfo1(**raiz, info);
+        const int info2 = ehInfo2(**raiz, info);
+        if(info1 || info2) {
+            if(ehFolha(*raiz)) {
+                if((*raiz)->ninfos == 2) {
+                    if(info1)
+                        (*raiz)->info1 = (*raiz)->info2;
                     (*raiz)->ninfos = 1;
-                    removeu = 1;
                 }
-                // Caso 2: remoção em nó folha com 2 infos, onde a palavra a ser removida é a info 1
-                else if (strcmp(info->palavra, (*raiz)->info1.palavra) == 0) {
-                    (*raiz)->info1 = (*raiz)->info2;
-                    (*raiz)->ninfos = 1;
-                    removeu = 1;
-                }
-            } else if ((*raiz)->ninfos == 1) {
-                // Caso 3: remoção em nó folha com 1 info e sem pai
-                if ((*pai) == NULL) {
-                    free(*raiz);
-                    *raiz = NULL;
-                    removeu = 1;
-                }
-                // Caso 4: remoção em nó folha com 1 info e com um pai
-                else if (*pai != NULL) {
-                    if ((*raiz) == (*pai)->esq) {
-                        (*raiz)->info1 = (*pai)->info1;
-                        paiaux = *pai;
-                        resultado = menorfilho((*pai)->cen, &paiaux);
-
-                        if (resultado != NULL) {
-                            (*pai)->info1 = resultado->info1;
-                            removeu = 1;
-
-                            if (resultado->ninfos == 2) {
-                                resultado->info1 = resultado->info2;
-                                resultado->ninfos = 1;
-                            } else {
-                                if ((*pai)->ninfos == 2) {
-                                    resultado->info1 = resultado->info2;
-                                    resultado->ninfos = 1;
-                                } else if (paiaux->ninfos == 1) {
-                                    (*raiz)->ninfos = 1;
-                                    free(resultado);
-                                    *pai = *raiz;
-                                } else {
-                                    if (paiaux != NULL) {
-                                        resultado->info1 = paiaux->info2;
-                                        paiaux1 = paiaux;
-                                        raizaux = menorfilho(paiaux1->dir, &paiaux1);
-
-                                        if (raizaux) {
-                                            paiaux->info2 = raizaux->info1;
-                                            if (raizaux->ninfos == 2) {
-                                                raizaux->info1 = raizaux->info2;
-                                                raizaux->ninfos = 1;
-                                            } else {
-                                                resultado->info2 = paiaux->info2;
-                                                resultado->ninfos = 2;
-                                                paiaux->ninfos = 1;
-                                                free(raizaux);
-                                                paiaux->dir = NULL;
-                                            }
-                                        }
-                                    }
-                                }
+                else {
+                    if(pai != NULL) {
+                        if((*raiz) == pai->esq)
+                            onda(pai->info1, &((*raiz)->info1), NULL, ref, ref);
+                        else {
+                            if(pai->ninfos == 2) {
+                                if(*raiz == pai->cen)
+                                    onda(pai->info2, &((*raiz)->info1), NULL, ref, ref);
+                                else
+                                    onda(pai->info2, &((*raiz)->cen->info2), NULL, ref, ref);
                             }
+                            else
+                                onda(pai->info1, &((*raiz)->info1), NULL, ref, ref);
                         }
-                    } else if ((*raiz) == (*pai)->cen) {
-                        removeu = 1;
-                        if ((*pai)->ninfos == 1) {
-                            if ((*pai)->esq->ninfos == 2) {
-                                (*raiz)->info1 = (*pai)->info1;
-                                (*pai)->info1 = ((*pai)->esq)->info2;
-                                ((*pai)->esq)->ninfos = 1;
-                            } else {
-                                Arv23PT *aux = NULL;
-                                ((*pai)->esq)->info2 = (*pai)->info1;
-                                free(*raiz);
-                                ((*pai)->esq)->ninfos = 2;
-                                aux = (*pai)->esq;
-                                free(*pai);
-                                *pai = aux;
-                            }
-                        } else {
-                            (*raiz)->info1 = (*pai)->info2;
-                            paiaux = *pai;
-                            resultado = menorfilho((*pai)->dir, &paiaux);
-
-                            if (resultado != NULL) {
-                                (*pai)->info2 = resultado->info1;
-                                if (resultado->ninfos == 2) {
-                                    resultado->info1 = resultado->info2;
-                                    resultado->ninfos = 1;
-                                } else {
-                                    (*raiz)->ninfos = 2;
-                                    (*raiz)->info2 = (*pai)->info2;
-                                    (*pai)->ninfos = 1;
-                                    free(resultado);
-                                    (*pai)->dir = NULL;
-                                }
-                            }
-                        }
-                    } else {
-                        removeu = 1;
-                        paiaux = *pai;
-                        resultado = menorfilho((*pai)->cen, &paiaux);
-
-                        if (resultado) {
-                            if (resultado->ninfos == 1) {
-                                resultado->info2 = (*pai)->info2;
-                                (*pai)->ninfos = 1;
-                                resultado->ninfos = 2;
-                                free(*raiz);
-                                *raiz = NULL;
-                            } else {
-                                (*raiz)->info1 = (*pai)->info2;
-                                (*pai)->info2 = resultado->info2;
-                                resultado->ninfos = 1;
+                    }
+                    else {
+                        free(*raiz);
+                        *raiz = NULL;
+                    }
+                }
+            }
+            else {
+                Arv23PT *filho, *auxpai;
+                Info auxinfo;
+                int juntou = 0;
+                if(info2) {
+                    if(removivel((*raiz)->dir)) {
+                        filho = menorfilho((*raiz)->dir, &auxpai, &auxinfo);
+                    }
+                    else if(removivel((*raiz)->cen)) {
+                        filho = maiorfilho((*raiz)->cen, &auxpai, &auxinfo);
+                        //juntou = 1
+                    }
+                    if(!juntou)
+                        onda(auxinfo, &((*raiz)->info2), auxpai, &filho, raiz);
+                }
+                if(info1){
+                    if(removivel((*raiz)->esq))
+                        filho = maiorfilho((*raiz)->esq, &auxpai, &auxinfo);
+                    else if(removivel((*raiz)->cen))
+                        filho = maiorfilho((*raiz)->cen, &auxpai, &auxinfo);
+                    else if((*raiz)->ninfos == 1) {
+                        if(pai != NULL) {
+                            if(*raiz == pai->esq || (pai->ninfos == 2 && (*raiz == pai->cen))) {
+                                filho = menorfilho((*raiz)->cen, &auxpai, &auxinfo);
+                                auxpai =
                             }
                         }
                     }
                 }
-            }
-        } else {
-            if (strcmp(info->palavra, (*raiz)->info1.palavra) < 0) {
-                removeu = removerArv23(&(*raiz)->esq, info, raiz);
-            } else if (strcmp(info->palavra, (*raiz)->info1.palavra) == 0) {
-                paiaux = *raiz;
-                resultado = menorfilho((*raiz)->cen, &paiaux);
-
-                if (resultado) {
-                    (*raiz)->info1 = resultado->info1;
-                    removerArv23(&(*raiz)->cen, &resultado->info1, raiz);
-                    removeu = 1;
-                }
-            } else if (((*raiz)->ninfos == 1) || strcmp(info->palavra, (*raiz)->info2.palavra) < 0) {
-                removeu = removerArv23(&(*raiz)->cen, info, raiz);
-            } else if (strcmp(info->palavra, (*raiz)->info2.palavra) == 0) {
-                paiaux = *raiz;
-                resultado = menorfilho((*raiz)->dir, &paiaux);
-
-                if (resultado) {
-                    (*raiz)->info2 = resultado->info1;
-                    removerArv23(&(*raiz)->dir, &resultado->info1, raiz);
-                    removeu = 1;
-                }
-            } else {
-                removeu = removerArv23(&(*raiz)->dir, info, raiz);
             }
         }
     }
