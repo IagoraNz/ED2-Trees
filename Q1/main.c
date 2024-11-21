@@ -47,8 +47,31 @@ int main() {
     printf("\nArvore em ordem:\n");
     exibirEmOrdem(pI);
 
-    // Libera memória alocada
-    freeTree(pI);
+    // Removendo todos os nós e exibindo um a um
+    int res = 0;
+    res = removerArv23(&pI, &info1, NULL);
+    printf("\nRemovendo 'ola': %d\n", res);
+    exibirEmOrdem(pI);
+
+    res = removerArv23(&pI, &info2, NULL);
+    printf("\nRemovendo 'zebra': %d\n", res);
+    exibirEmOrdem(pI);
+
+    res = removerArv23(&pI, &info3, NULL);
+    printf("\nRemovendo 'casa': %d\n", res);
+    exibirEmOrdem(pI);
+
+    res = removerArv23(&pI, &info4, NULL);
+    printf("\nRemovendo 'abobora': %d\n", res);
+    exibirEmOrdem(pI);
+
+    res = removerArv23(&pI, &info6, NULL);
+    printf("\nRemovendo 'uva': %d\n", res);
+    exibirEmOrdem(pI);
+
+    res = removerArv23(&pI, &info5, NULL);
+    printf("\nRemovendo 'pera': %d\n", res);
+    exibirEmOrdem(pI);
 
     return 0;
 }
