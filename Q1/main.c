@@ -15,7 +15,7 @@ void insere(Arv23PT **pi, const Info info) {
 void exibirPTBR(const IngPTBST *raiz) {
     if (raiz != NULL) {
         exibirPTBR(raiz->esq);
-        printf("Palavra Portugues: %s\n", raiz->palavra);
+        printf("Palavra EN: %s\n", raiz->palavra);
         exibirPTBR(raiz->dir);
     }
 }
@@ -24,46 +24,46 @@ void exibirEmOrdem(const Arv23PT *ptIn) {
     if (ptIn) {
         exibirEmOrdem(ptIn->esq);
 
-        printf("Palavra Ingles: %s\n", ptIn->info1.palavra);
+        printf("Palavra PT-BR: %s\n", ptIn->info1.palavra);
         exibirPTBR(ptIn->info1.versaoIng);
 
         exibirEmOrdem(ptIn->cen);
 
         if (ptIn->ninfos == 2) {
-            printf("Palavra Ingles: %s\n", ptIn->info2.palavra);
+            printf("Palavra PT-BR: %s\n", ptIn->info2.palavra);
             exibirPTBR(ptIn->info2.versaoIng);
             exibirEmOrdem(ptIn->dir);
         }
     }
 }
 
-int adicionarPalavraPTBR(Arv23PT **raiz, char *palavraIngles, char *palavraPTBR) {
+int adicionarPalavraEN(Arv23PT **raiz, char *palavraPTBR, char *palavraIngles) {
     int sucesso = 0;
     if ((*raiz) != NULL) {
-        char *palavraENUpper = (char*)malloc(strlen(palavraIngles) + 1);
-        strcpy(palavraENUpper, palavraIngles);
-        toupperString(palavraENUpper);
+        char *palavraPTUpper = (char*)malloc(strlen(palavraPTBR) + 1);
+        strcpy(palavraPTUpper, palavraPTBR);
+        toupperString(palavraPTUpper);
 
-        if (strcmp((*raiz)->info1.palavra, palavraENUpper) == 0) {
-            sucesso = insereArvBin(&((*raiz)->info1.versaoIng), palavraPTBR);
-        } else if ((*raiz)->ninfos == 2 && strcmp(palavraENUpper, (*raiz)->info2.palavra) == 0) {
-            sucesso = insereArvBin(&((*raiz)->info2.versaoIng), palavraPTBR);
+        if (strcmp((*raiz)->info1.palavra, palavraPTUpper) == 0) {
+            sucesso = insereArvBin(&((*raiz)->info1.versaoIng), palavraIngles);
+        } else if ((*raiz)->ninfos == 2 && strcmp(palavraPTUpper, (*raiz)->info2.palavra) == 0) {
+            sucesso = insereArvBin(&((*raiz)->info2.versaoIng), palavraIngles);
         } else
         {
-            if (strcmp((*raiz)->info1.palavra, palavraENUpper) > 0) {
-                sucesso = adicionarPalavraPTBR(&((*raiz)->esq), palavraENUpper, palavraPTBR);
-            } else if ((*raiz)->ninfos == 2 && strcmp((*raiz)->info2.palavra, palavraENUpper) > 0) {
-                sucesso = adicionarPalavraPTBR(&((*raiz)->cen), palavraENUpper, palavraPTBR);
+            if (strcmp((*raiz)->info1.palavra, palavraPTUpper) > 0) {
+                sucesso = adicionarPalavraEN(&((*raiz)->esq), palavraPTUpper, palavraIngles);
+            } else if ((*raiz)->ninfos == 2 && strcmp((*raiz)->info2.palavra, palavraPTUpper) > 0) {
+                sucesso = adicionarPalavraEN(&((*raiz)->cen), palavraPTUpper, palavraIngles);
             } else {
-                sucesso = adicionarPalavraPTBR(&((*raiz)->dir), palavraENUpper, palavraPTBR);
+                sucesso = adicionarPalavraEN(&((*raiz)->dir), palavraPTUpper, palavraIngles);
             }
         }
     }
 }
 
 int main() {
-    Info info1 = {malloc(strlen("Bus") + 1), NULL, 1};
-    strcpy(info1.palavra, "Bus");
+    Info info1 = {malloc(strlen("Onibus") + 1), NULL, 1};
+    strcpy(info1.palavra, "Onibus");
 
     Info info2 = {malloc(strlen("zebra") + 1), NULL, 1};
     strcpy(info2.palavra, "zebra");
@@ -104,8 +104,9 @@ int main() {
     insere(&pI, info4);
     insere(&pI, info5);
 
-    adicionarPalavraPTBR(&pI, "bus", "Onibus");
-    adicionarPalavraPTBR(&pI, "BUS", "Barramento");
+    adicionarPalavraEN(&pI, "onibus", "Bus");
+    adicionarPalavraEN(&pI, "onibus", "Omnibus");
+    adicionarPalavraEN(&pI, "onIbuS", "Coach");
 
     // Exibe a árvore em ordem
     printf("\nArvore em ordem:\n");
