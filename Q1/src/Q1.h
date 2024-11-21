@@ -7,13 +7,13 @@
 
 typedef struct ingptbst{
     char *palavra;
-    int unidade;
     struct ingptbst *dir,*esq;
 } IngPTBST;
 
 typedef struct info {
     char *palavra;
     IngPTBST *versaoIng;
+    int unidade;
 } Info;
 
 typedef struct Arv23pt{

@@ -281,6 +281,20 @@ int removerArv23(Arv23PT **raiz, const Info *info, Arv23PT **pai){
                                 *pai = aux;
                             }
                         }
+                        /* Caso 5.2: o pai possui 2 infos */
+                        else {
+                            (*raiz)->info1 = (*pai)->info2;
+                            paiaux = *pai;
+                            resultado = menorfilho((*pai)->dir, &paiaux);
+                            (*pai)->info2 = resultado->info1;
+                            /*
+                            É como se o movimento fosse:
+                            i.
+                                        |---------------|| 100 || 500 || -- (pai) -----------|
+                                        |                      |                             |
+                                ||  50  || 90  ||       || 150 ||     || (raiz)       || 250 ||     || (raiz)
+                            */
+                        }
                     }
                 }
             }
