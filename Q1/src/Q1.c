@@ -5,11 +5,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "Q1.h"
 
 /*-----------------------------------------------------------------------------------------------------*/
 
 /* (pré-itens) funções necessárias para que os itens i, ii, iii e iv possam ocorrer */
+
+void toupperString(char *string) {
+    for (int i = 0; string[i] != '\0'; i++) {
+        string[i] = toupper(string[i]);
+    }
+}
 
 Arv23PT *criaNo(const Info informacao, Arv23PT *filhoesq, Arv23PT *filhocen){
     Arv23PT *no = (Arv23PT*)malloc(sizeof(Arv23PT));
@@ -130,6 +137,26 @@ void freeTree(Arv23PT *no){
         freeTree(no->cen);
         freeTree(no->dir);
         free(no);
+    }
+}
+
+int insereArvBin(IngPTBST **raiz, const char *palavra) {
+    int sucesso = 0;
+    if ((*raiz) == NULL){
+        IngPTBST *novo = (IngPTBST *)malloc(sizeof(IngPTBST));
+        novo->palavra = (char *)malloc(strlen(palavra) + 1);
+        strcpy(novo->palavra, palavra);
+        toupperString(novo->palavra);
+        novo->esq = NULL;
+        novo->dir = NULL;
+        *raiz = novo;
+        sucesso = 1;
+    } else {
+        if (strcmp(palavra, (*raiz)->palavra) < 0) {
+            sucesso = insereArvBin(&(*raiz)->esq, palavra);
+        } else {
+            sucesso = insereArvBin(&(*raiz)->dir, palavra);
+        }
     }
 }
 
