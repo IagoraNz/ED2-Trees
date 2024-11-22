@@ -7,7 +7,7 @@ void insere(Arv23PT **pi, const Info info) {
     Info promove;
     Arv23PT *novoNo = inserirArv23(pi, info, &promove, NULL);
 
-    if(novoNo){
+    if (novoNo) {
         *pi = criaNo(promove, *pi, novoNo);
     }
 }
@@ -27,7 +27,7 @@ void exibirEmOrdem(const Arv23PT *ptIn) {
         printf("Palavra PT-BR: %s\n", ptIn->info1.palavra);
         exibirPTBR(ptIn->info1.versaoIng);
 
-        exibirEmOrdem(ptIn->cen);
+        exibirEmOrdem(no->cen);
 
         if (ptIn->ninfos == 2) {
             printf("Palavra PT-BR: %s\n", ptIn->info2.palavra);
@@ -59,6 +59,40 @@ int adicionarPalavraEN(Arv23PT **raiz, char *palavraPTBR, char *palavraIngles) {
             }
         }
     }
+}
+
+void exibirPreOrdem(const Arv23PT *no ){
+    if (no) {
+        printf("%s\n", no->info1.palavra);
+        exibirPreOrdem(no->esq);
+        exibirPreOrdem(no->cen);
+
+        if (no->ninfos == 2) {
+            printf("%s\n", no->info2.palavra);
+            exibirPreOrdem(no->dir);
+        }
+    }
+}
+
+void exibirPosOrdem(const Arv23PT *no ){
+    if (no) {
+        exibirPosOrdem(no->esq);
+        exibirPosOrdem(no->cen);
+
+        if (no->ninfos == 2) {
+            exibirPosOrdem(no->dir);
+            printf("%s\n", no->info2.palavra);
+        }
+
+        printf("%s\n", no->info1.palavra);
+    }
+}
+
+void removerElemento(Arv23PT **raiz, const char *palavra) {
+    if (removerArv23(raiz, palavra, NULL, raiz))
+        printf("Elemento '%s' removido com sucesso.\n", palavra);
+    else
+        printf("Elemento '%s' nao encontrado.\n", palavra);
 }
 
 int main() {
@@ -102,7 +136,10 @@ int main() {
     insere(&pI, info6);
     insere(&pI, info3);
     insere(&pI, info4);
-    insere(&pI, info5);
+    insere(&pI, info7);
+    insere(&pI, info8);
+    insere(&pI, info9);
+    insere(&pI, info10);
 
     adicionarPalavraEN(&pI, "onibus", "Bus");
     adicionarPalavraEN(&pI, "onibus", "Omnibus");
@@ -112,8 +149,19 @@ int main() {
     printf("\nArvore em ordem:\n");
     exibirEmOrdem(pI);
 
-    // Libera memória alocada
-    freeTree(pI);
+    // Remoções de elementos
+    printf("\nRemovendo elementos:\n");
+    removerElemento(&pI, "rato");
+    removerElemento(&pI, "zebra");
+    removerElemento(&pI, "vento");
+
+    // Exibe a árvore novamente após remoções
+    printf("\nArvore em ordem apos remocoes:\n");
+    exibirEmOrdem(pI);
+    printf("\n\n");
+    exibirPreOrdem(pI);
+    printf("\n\n");
+    exibirPosOrdem(pI);
 
     return 0;
 }

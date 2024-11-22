@@ -176,155 +176,211 @@ português dada, independente da unidade */
 das quais ela pertence. Caso ela seja a única palavra em uma das árvores binárias, remover também da
 árvore 2-3 */
 
-int ehFolhaR(const Arv23PT *no){
+void onda(const Info info, Info *entrada, const Arv23PT *pai, Arv23PT **fonte, Arv23PT **raiz) {
+    removerArv23(raiz, info.palavra, pai, fonte);
+    if(entrada)
+        *entrada = info;
+}
+
+int removivel(const Arv23PT *raiz) {
+    int pode = 0;
+
+    if(raiz != NULL) {
+        if(raiz->ninfos == 2)
+            pode = 1;
+        if(!pode) {
+            pode = removivel(raiz->cen);
+            if(!pode)
+                pode = removivel(raiz->esq);
+        }
+    }
+    return pode;
+}
+
+Arv23PT *menorfilho(Arv23PT *no, Arv23PT **pai, Info *res){
+    *pai = no;
+    Arv23PT *filho = no->esq;
+
+    while(filho != NULL && !ehFolha(filho)){
+        *pai = filho;
+        filho = filho->esq;
+    }
+    if(filho != NULL)
+        *res = filho->info1;
+
+    return filho;
+}
+
+Arv23PT *maior(const Arv23PT *raiz) {
+    return raiz->ninfos == 2 ? raiz->dir : raiz->cen;
+}
+
+Arv23PT *maiorfilho(Arv23PT *raiz, Arv23PT **pai, Info *maiorinfo) {
+    Arv23PT *filho = maior(raiz);
+    *pai = raiz;
+
+    while(filho != NULL && maior(filho) != NULL) {
+        *pai = filho;
+        filho = maior(filho);
+    }
+    if(filho != NULL)
+        *maiorinfo = filho->ninfos ? filho->info2 : filho->info1;
+
+    return filho;
+}
+
+void desalocaNo(Arv23PT **no) {
+    free(*no);
+    *no = NULL;
+}
+
+Arv23PT *juntaNo(Arv23PT *filho1, Arv23PT *filho2, Arv23PT **filho3) {
+    Arv23PT *maior = NULL;
+    if(!ehFolha(filho2)) {
+        maior = juntaNo(filho2->esq, filho2->cen, &(filho1->dir));
+
+        const Info aux = filho2->info1;
+        filho2->info1 = maior->info1;
+        maior->info1 = aux;
+    }
+
+    filho1->info2 = filho2->info1;
+    maior = filho1;
+    *filho3 = maior;
+    desalocaNo(&filho2);
+
+    return maior;
+}
+
+int ehInfo1(const Arv23PT no, const char *palavra){
     int aux = 0;
-    if(no->esq == NULL)
-        aux = 1;
+    if(no.ninfos == 1 && palavra && no.info1.palavra)
+        aux = strcmp(no.info1.palavra, palavra) == 0;
     return aux;
 }
 
-Arv23PT *menorfilho(Arv23PT *no, Arv23PT **parente) {
-    (*parente) = no;
-    while(no->esq != NULL) {
-        (*parente) = no;
-        no = no->esq;
-    }
-
-    return no;
+int ehInfo2(const Arv23PT no, const char *palavra){
+    int aux = 0;
+    if(no.ninfos == 2 && palavra && no.info2.palavra)
+        aux = strcmp(no.info2.palavra, palavra) == 0;
+    return aux;
 }
 
-int removerArv23(Arv23PT **raiz, const Info *info, Arv23PT **pai){
+Arv23PT *buscapai(Arv23PT *raiz, const char *palavra) {
+    Arv23PT *pai = NULL;
+
+    if(raiz != NULL) {
+        if(!ehInfo1(*raiz, palavra) && !ehInfo2(*raiz, palavra)) {
+            if(strcmp(palavra, raiz->info1.palavra) < 0)
+                pai = buscapai(raiz->esq, palavra);
+            else if(raiz->ninfos == 1 || strcmp(palavra, raiz->info1.palavra) < 0)
+                pai = buscapai(raiz->cen, palavra);
+            else
+                pai = buscapai(raiz->dir, palavra);
+
+            if(!pai)
+                pai = raiz;
+        }
+    }
+    return pai;
+}
+
+int removerArv23(Arv23PT **raiz, const char *info, const Arv23PT *pai, Arv23PT **ref) {
     int removeu = 0;
-    Arv23PT *paiaux = NULL, *paiaux1 = NULL, *raizaux = NULL, *resultado = NULL;
 
-    if((*raiz) != NULL) {
-        if(ehFolhaR(*raiz)) {
-            if((*raiz)->ninfos == 2) {
-                // Caso 1: remoção em nó folha com 2 infos, onde a palavra a ser removida é a info 2
-                if(strcmp(info->palavra, (*raiz)->info2.palavra) == 0){
+    if(*raiz != NULL) {
+        const int info1 = ehInfo1(**raiz, info);
+        const int info2 = ehInfo2(**raiz, info);
+        if(info1 || info2) {
+            if(ehFolha(*raiz)) {
+                if((*raiz)->ninfos == 2) {
+                    if(info1)
+                        (*raiz)->info1 = (*raiz)->info2;
                     (*raiz)->ninfos = 1;
                     removeu = 1;
                 }
-                // Caso 2: remoção em nó folha com 2 infos, onde a palavra a ser removida é a info 1
-                else if(strcmp(info->palavra, (*raiz)->info1.palavra) == 0) {
-                    (*raiz)->info1 = (*raiz)->info2;
-                    (*raiz)->ninfos = 1;
-                    removeu = 1;
+                else {
+                    if(pai != NULL) {
+                        if((*raiz) == pai->esq)
+                            onda(pai->info1, &((*raiz)->info1), NULL, ref, ref);
+                        else {
+                            if(pai->ninfos == 2) {
+                                if(*raiz == pai->cen)
+                                    onda(pai->info2, &((*raiz)->info1), NULL, ref, ref);
+                                else
+                                    onda(pai->info2, &(pai->cen->info2), NULL, ref, ref);
+                            }
+                            else
+                                onda(pai->info1, &(pai->esq->info2), NULL, ref, ref);
+                        }
+                        removeu = 1;
+                    }
+                    else {
+                        free(*raiz);
+                        *raiz = NULL;
+                        removeu = 1;
+                    }
                 }
             }
-            else if((*raiz)->ninfos == 1) {
-                // Caso 3: remoção em nó folha com 1 info e sem pai
-                if((*pai) == NULL) {
-                    free((*raiz));
-                    (*raiz) = NULL;
-                    removeu = 1;
-                }
-                else if((*pai) != NULL) {
-                    /* Caso 4: remoção em nó folha com 1 info e com um pai, e a info
-                    é o filho da esquerda*/
-                    if((*raiz) == (*pai)->esq){
-                        (*raiz)->info1 = (*pai)->info1;
-                        paiaux = *pai;
-                        resultado = menorfilho((*pai)->cen, &paiaux);
-                        (*pai)->info1 = resultado->info1;
-                        removeu = 1;
-                        /* Caso 4.1: o menor no possui duas infos */
-                        if(resultado->ninfos == 2) {
-                            resultado->info1 = resultado->info2;
-                            resultado->ninfos = 1;
-                        }
-                        /* Caso 4.2: o menor no possui uma info */
-                        else {
-                            /* Caso 4.2.1: o menor no possui uma info e o pai possui ninfos == 2 */
-                            if((*pai)->ninfos == 2) {
-                                resultado->info1 = resultado->info2;
-                                resultado->ninfos = 1;
-                            }
-                            else {
-                                /* Caso 4.2.2: o nó pai possui apenas 1 info*/
-                                if(paiaux->ninfos == 1) {
-                                    (*raiz)->info2 = resultado->info1;
-                                    (*raiz)->ninfos = 1;
-                                    free(resultado);
-                                    *pai = *raiz;
-                                }
-                                /* Caso 4.2.3: o nó pai possui apenas 2 infos*/
-                                else {
-                                    resultado->info1 = paiaux->info2;
-                                    paiaux1 = paiaux;
-                                    raizaux = menorfilho(paiaux1->dir, &paiaux1);
-                                    paiaux->info2 = raizaux->info1;
-                                    /* Caso 4.2.3.1: o nó auxiliar possui 2 infos*/
-                                    if(raizaux->ninfos == 2) {
-                                        /* Mesmo movimento da "onda" já visto */
-                                        raizaux->info1 = raizaux->info2;
-                                        raizaux->ninfos == 1;
-                                    }
-                                    /* Caso 4.2.3.2: o nó auxiliar possui 1 info*/
-                                    else {
-                                        resultado->info2 = paiaux->info2;
-                                        resultado->ninfos = 2;
-                                        paiaux->ninfos = 1;
-                                        free(raizaux);
-                                        paiaux->dir = NULL;
-                                    }
-                                }
-                            }
-                        }
+            else {
+                removeu = 1;
+                Arv23PT *filho, *auxpai;
+                Info auxinfo;
+                int juntou = 0;
+                if(info2) {
+                    if(removivel((*raiz)->dir))
+                        filho = menorfilho((*raiz)->dir, &auxpai, &auxinfo);
+                    else if(removivel((*raiz)->cen))
+                        filho = maiorfilho((*raiz)->cen, &auxpai, &auxinfo);
+                    else {
+                        juntaNo((*raiz)->cen, (*raiz)->dir, &(*raiz)->cen);
+                        juntou = 1;
                     }
-                    /* Caso 5: remoção em nó folha com 1 info e com um pai, e a info
-                    é o filho do centro*/
-                    else if((*raiz) == (*pai)->cen) {
-                        removeu = 1;
-                        /* Caso 5.1: o pai possui 1 info */
-                        if((*pai)->ninfos == 1) {
-                            /* Caso 5.1.1: o nó à esquerda do pai possui 2 infos*/
-                            if((*pai)->esq->ninfos == 2) {
-                                /* Movimento da onda */
-                                (*raiz)->info1 = (*pai)->info1;
-                                /*
-                                É como se o movimento fosse:
-                                i.
-                                        |---------------|| 100 ||     || (pai)
-                                        |                      |
-                                ||  50  || 90  ||       || 150 ||     || (raiz)
+                    if(!juntou)
+                        onda(auxinfo, &((*raiz)->info2), auxpai, &filho, raiz);
+                }
+                if(info1){
+                    if(removivel((*raiz)->esq))
+                        filho = maiorfilho((*raiz)->esq, &auxpai, &auxinfo);
+                    else if(removivel((*raiz)->cen))
+                        filho = maiorfilho((*raiz)->cen, &auxpai, &auxinfo);
+                    else if((*raiz)->ninfos == 1) {
+                        if(pai != NULL) {
+                            if(*raiz == pai->esq || (pai->ninfos == 2 && (*raiz == pai->cen))) {
+                                filho = menorfilho((*raiz)->cen, &auxpai, &auxinfo);
+                                auxpai = buscapai(*ref, pai->info1.palavra);
 
-                                ii.
-                                        |---------------||  90  ||     || (pai)
-                                        |                       |
-                                ||  50  ||     ||       || 100 ||     || (raiz)
-                                */
-                                (*pai)->info1 =((*pai)->esq)->info2;
-                                ((*pai)->esq)->ninfos = 1;
+                                if(*raiz == pai->esq)
+                                    onda(pai->info1, &(filho->info2), auxpai, ref, ref);
+                                else
+                                    onda(pai->info2, &(filho->info2), auxpai, ref, ref);
                             }
-                            /* Caso 5.1.2: o nó à esquerda do pais possui 1 info*/
                             else {
-                                Arv23PT *aux = NULL;
-                                ((*pai)->esq)->info2 = (*pai)->info1;
-                                free(*raiz);
-                                ((*pai)->esq)->ninfos = 2;
-                                aux = (*pai)->esq;
-                                free(*pai);
-                                *pai = aux;
+                                filho = maiorfilho((*raiz)->esq, &auxpai, &auxinfo);
+                                auxpai = buscapai(*ref, pai->info1.palavra);
+                                filho->info2 = filho->info1;
+                                onda((pai->ninfos == 2 && (*raiz == pai->dir)) ? pai->info2 : pai->info1, &((*raiz)->info1), auxpai, ref, ref);
                             }
                         }
-                        /* Caso 5.2: o pai possui 2 infos */
                         else {
-                            (*raiz)->info1 = (*pai)->info2;
-                            paiaux = *pai;
-                            resultado = menorfilho((*pai)->dir, &paiaux);
-                            (*pai)->info2 = resultado->info1;
-                            /*
-                            É como se o movimento fosse:
-                            i.
-                                        |---------------|| 100 || 500 || -- (pai) -----------|
-                                        |                      |                             |
-                                ||  50  || 90  ||       || 150 ||     || (raiz)       || 250 ||     || (raiz)
-                            */
+                            Arv23PT *aux = *raiz;
+                            juntaNo((*raiz)->esq, (*raiz)->cen, raiz);
+                            juntou = 1;
+                            desalocaNo(&aux);
                         }
                     }
+                    if(pai != NULL && !juntou)
+                        onda(auxinfo, &((*raiz)->info1), auxpai, ref, &filho);
                 }
             }
+        }
+        else {
+            if(strcmp(info, (*raiz)->info1.palavra) < 0)
+                removeu = removerArv23((&(*raiz)->esq), info, *raiz, ref);
+            else if((*raiz)->ninfos == 1 || strcmp(info, (*raiz)->info2.palavra) < 0)
+                removeu = removerArv23((&(*raiz)->cen), info, *raiz, ref);
+            else
+                removeu = removerArv23((&(*raiz)->dir), info, *raiz, ref);
         }
     }
 

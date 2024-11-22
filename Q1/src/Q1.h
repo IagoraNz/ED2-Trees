@@ -32,6 +32,7 @@ typedef struct Arv23pt{
 Arv23PT * criaNo(Info info, Arv23PT * pi, Arv23PT * arv23_pt);
 Arv23PT *inserirArv23(Arv23PT **no, Info informacao, Info *promove, Arv23PT **pai);
 int insereArvBin(IngPTBST **raiz, const char *palavra);
+int removerArv23(Arv23PT **raiz, const char *info, const Arv23PT *pai, Arv23PT **ref);
 void freeTree(Arv23PT *no);
 void toupperString(char *string);
 
