@@ -159,8 +159,7 @@ int removivel(const Arv23PT *raiz) {
     int pode = 0;
 
     if(raiz != NULL) {
-        if(raiz->ninfos == 2)
-            pode = 1;
+        pode = raiz->ninfos == 2;
         if(!pode) {
             pode = removivel(raiz->cen);
             if(!pode)
@@ -171,10 +170,9 @@ int removivel(const Arv23PT *raiz) {
 }
 
 Arv23PT *menorfilho(Arv23PT *no, Arv23PT **pai, Info *res){
-    *pai = no;
-    Arv23PT *filho = no->esq;
+    Arv23PT *filho = no;
 
-    while(filho != NULL && !ehFolha(filho)){
+    while(!ehFolha(filho)){
         *pai = filho;
         filho = filho->esq;
     }
@@ -189,15 +187,14 @@ Arv23PT *maior(const Arv23PT *raiz) {
 }
 
 Arv23PT *maiorfilho(Arv23PT *raiz, Arv23PT **pai, Info *maiorinfo) {
-    Arv23PT *filho = maior(raiz);
-    *pai = raiz;
+    Arv23PT *filho = raiz;
 
-    while(filho != NULL && maior(filho) != NULL) {
+    while(!ehFolha(filho)) {
         *pai = filho;
         filho = maior(filho);
     }
     if(filho != NULL)
-        *maiorinfo = filho->ninfos ? filho->info2 : filho->info1;
+        *maiorinfo = filho->ninfos == 2 ? filho->info2 : filho->info1;
 
     return filho;
 }
@@ -218,6 +215,7 @@ Arv23PT *juntaNo(Arv23PT *filho1, Arv23PT *filho2, Arv23PT **filho3) {
     }
 
     filho1->info2 = filho2->info1;
+    filho1->ninfos == 2;
     maior = filho1;
     *filho3 = maior;
     desalocaNo(&filho2);
@@ -246,7 +244,7 @@ Arv23PT *buscapai(Arv23PT *raiz, const char *palavra) {
         if(!ehInfo1(*raiz, palavra) && !ehInfo2(*raiz, palavra)) {
             if(strcmp(palavra, raiz->info1.palavra) < 0)
                 pai = buscapai(raiz->esq, palavra);
-            else if(raiz->ninfos == 1 || strcmp(palavra, raiz->info1.palavra) < 0)
+            else if(raiz->ninfos == 1 || strcmp(palavra, raiz->info2.palavra) < 0)
                 pai = buscapai(raiz->cen, palavra);
             else
                 pai = buscapai(raiz->dir, palavra);
@@ -258,9 +256,7 @@ Arv23PT *buscapai(Arv23PT *raiz, const char *palavra) {
     return pai;
 }
 
-int removerArv23(Arv23PT **raiz, const char *info, const Arv23PT *pai, Arv23PT **ref) {
-    int removeu = 0;
-
+void removerArv23(Arv23PT **raiz, const char *info, const Arv23PT *pai, Arv23PT **ref) {
     if(*raiz != NULL) {
         const int info1 = ehInfo1(**raiz, info);
         const int info2 = ehInfo2(**raiz, info);
@@ -270,7 +266,6 @@ int removerArv23(Arv23PT **raiz, const char *info, const Arv23PT *pai, Arv23PT *
                     if(info1)
                         (*raiz)->info1 = (*raiz)->info2;
                     (*raiz)->ninfos = 1;
-                    removeu = 1;
                 }
                 else {
                     if(pai != NULL) {
@@ -286,18 +281,16 @@ int removerArv23(Arv23PT **raiz, const char *info, const Arv23PT *pai, Arv23PT *
                             else
                                 onda(pai->info1, &(pai->esq->info2), NULL, ref, ref);
                         }
-                        removeu = 1;
                     }
                     else {
                         free(*raiz);
                         *raiz = NULL;
-                        removeu = 1;
                     }
                 }
             }
             else {
-                removeu = 1;
                 Arv23PT *filho, *auxpai;
+                auxpai = *raiz;
                 Info auxinfo;
                 int juntou = 0;
                 if(info2) {
@@ -307,16 +300,17 @@ int removerArv23(Arv23PT **raiz, const char *info, const Arv23PT *pai, Arv23PT *
                         filho = maiorfilho((*raiz)->cen, &auxpai, &auxinfo);
                     else {
                         juntaNo((*raiz)->cen, (*raiz)->dir, &(*raiz)->cen);
+                        (*raiz)->ninfos = 1;
                         juntou = 1;
                     }
                     if(!juntou)
-                        onda(auxinfo, &((*raiz)->info2), auxpai, &filho, raiz);
+                        onda(auxinfo, &((*raiz)->info2), auxpai, ref, &filho);
                 }
                 if(info1){
                     if(removivel((*raiz)->esq))
                         filho = maiorfilho((*raiz)->esq, &auxpai, &auxinfo);
                     else if(removivel((*raiz)->cen))
-                        filho = maiorfilho((*raiz)->cen, &auxpai, &auxinfo);
+                        filho = menorfilho((*raiz)->cen, &auxpai, &auxinfo);
                     else if((*raiz)->ninfos == 1) {
                         if(pai != NULL) {
                             if(*raiz == pai->esq || (pai->ninfos == 2 && (*raiz == pai->cen))) {
@@ -332,7 +326,10 @@ int removerArv23(Arv23PT **raiz, const char *info, const Arv23PT *pai, Arv23PT *
                                 filho = maiorfilho((*raiz)->esq, &auxpai, &auxinfo);
                                 auxpai = buscapai(*ref, pai->info1.palavra);
                                 filho->info2 = filho->info1;
-                                onda((pai->ninfos == 2 && (*raiz == pai->dir)) ? pai->info2 : pai->info1, &((*raiz)->info1), auxpai, ref, ref);
+                                if(pai->ninfos == 2 && (*raiz == pai->dir))
+                                    onda(pai->info2, &(filho->info1), auxpai, ref, ref);
+                                else
+                                    onda(pai->info2, &(filho->info1), auxpai, ref, ref);
                             }
                         }
                         else {
@@ -349,15 +346,13 @@ int removerArv23(Arv23PT **raiz, const char *info, const Arv23PT *pai, Arv23PT *
         }
         else {
             if(strcmp(info, (*raiz)->info1.palavra) < 0)
-                removeu = removerArv23((&(*raiz)->esq), info, *raiz, ref);
+                removerArv23((&(*raiz)->esq), info, *raiz, ref);
             else if((*raiz)->ninfos == 1 || strcmp(info, (*raiz)->info2.palavra) < 0)
-                removeu = removerArv23((&(*raiz)->cen), info, *raiz, ref);
+                removerArv23((&(*raiz)->cen), info, *raiz, ref);
             else
-                removeu = removerArv23((&(*raiz)->dir), info, *raiz, ref);
+                removerArv23((&(*raiz)->dir), info, *raiz, ref);
         }
     }
-
-    return removeu;
 }
 
 /*-----------------------------------------------------------------------------------------------------*/
