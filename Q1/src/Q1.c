@@ -155,18 +155,12 @@ void onda(const Info info, Info *entrada, const Arv23PT *pai, Arv23PT **fonte, A
         *entrada = info;
 }
 
-int ehFolhaR(const Arv23PT *no){
-    int aux = 0;
-    if(no->esq == NULL)
-        aux = 1;
-    return aux;
-}
-
 int removivel(const Arv23PT *raiz) {
     int pode = 0;
 
     if(raiz != NULL) {
-        pode = raiz->ninfos == 2;
+        if(raiz->ninfos == 2)
+            pode = 1;
         if(!pode) {
             pode = removivel(raiz->cen);
             if(!pode)
@@ -180,7 +174,7 @@ Arv23PT *menorfilho(Arv23PT *no, Arv23PT **pai, Info *res){
     *pai = no;
     Arv23PT *filho = no->esq;
 
-    while(filho != NULL && !ehFolhaR(filho)){
+    while(filho != NULL && !ehFolha(filho)){
         *pai = filho;
         filho = filho->esq;
     }
@@ -208,23 +202,60 @@ Arv23PT *maiorfilho(Arv23PT *raiz, Arv23PT **pai, Info *maiorinfo) {
     return filho;
 }
 
+void desalocaNo(Arv23PT **no) {
+    free(*no);
+    *no = NULL;
+}
+
+Arv23PT *juntaNo(Arv23PT *filho1, Arv23PT *filho2, Arv23PT **filho3) {
+    Arv23PT *maior = NULL;
+    if(!ehFolha(filho2)) {
+        maior = juntaNo(filho2->esq, filho2->cen, &(filho1->dir));
+
+        const Info aux = filho2->info1;
+        filho2->info1 = maior->info1;
+        maior->info1 = aux;
+    }
+
+    filho1->info2 = filho2->info1;
+    maior = filho1;
+    *filho3 = maior;
+    desalocaNo(&filho2);
+
+    return maior;
+}
+
 int ehInfo1(const Arv23PT no, const char *palavra){
-    return strcmp(no.info1.palavra, palavra) == 0;
+    int aux = 0;
+    if(no.ninfos == 1 && palavra && no.info1.palavra)
+        aux = strcmp(no.info1.palavra, palavra) == 0;
+    return aux;
 }
 
 int ehInfo2(const Arv23PT no, const char *palavra){
-    return strcmp(no.info2.palavra, palavra) == 0;
+    int aux = 0;
+    if(no.ninfos == 2 && palavra && no.info2.palavra)
+        aux = strcmp(no.info2.palavra, palavra) == 0;
+    return aux;
 }
 
-Arv23PT *buscpai(const Arv23PT *raiz, const char *palavra) {
+Arv23PT *buscapai(Arv23PT *raiz, const char *palavra) {
     Arv23PT *pai = NULL;
 
     if(raiz != NULL) {
         if(!ehInfo1(*raiz, palavra) && !ehInfo2(*raiz, palavra)) {
             if(strcmp(palavra, raiz->info1.palavra) < 0)
+                pai = buscapai(raiz->esq, palavra);
+            else if(raiz->ninfos == 1 || strcmp(palavra, raiz->info1.palavra) < 0)
+                pai = buscapai(raiz->cen, palavra);
+            else
+                pai = buscapai(raiz->dir, palavra);
 
+            if(!pai)
+                pai = raiz;
         }
     }
+    return pai;
 }
 
 int removerArv23(Arv23PT **raiz, const char *info, const Arv23PT *pai, Arv23PT **ref) {
@@ -239,6 +270,7 @@ int removerArv23(Arv23PT **raiz, const char *info, const Arv23PT *pai, Arv23PT *
                     if(info1)
                         (*raiz)->info1 = (*raiz)->info2;
                     (*raiz)->ninfos = 1;
+                    removeu = 1;
                 }
                 else {
                     if(pai != NULL) {
@@ -249,29 +281,33 @@ int removerArv23(Arv23PT **raiz, const char *info, const Arv23PT *pai, Arv23PT *
                                 if(*raiz == pai->cen)
                                     onda(pai->info2, &((*raiz)->info1), NULL, ref, ref);
                                 else
-                                    onda(pai->info2, &((*raiz)->cen->info2), NULL, ref, ref);
+                                    onda(pai->info2, &(pai->cen->info2), NULL, ref, ref);
                             }
                             else
-                                onda(pai->info1, &((*raiz)->info1), NULL, ref, ref);
+                                onda(pai->info1, &(pai->esq->info2), NULL, ref, ref);
                         }
+                        removeu = 1;
                     }
                     else {
                         free(*raiz);
                         *raiz = NULL;
+                        removeu = 1;
                     }
                 }
             }
             else {
+                removeu = 1;
                 Arv23PT *filho, *auxpai;
                 Info auxinfo;
                 int juntou = 0;
                 if(info2) {
-                    if(removivel((*raiz)->dir)) {
+                    if(removivel((*raiz)->dir))
                         filho = menorfilho((*raiz)->dir, &auxpai, &auxinfo);
-                    }
-                    else if(removivel((*raiz)->cen)) {
+                    else if(removivel((*raiz)->cen))
                         filho = maiorfilho((*raiz)->cen, &auxpai, &auxinfo);
-                        //juntou = 1
+                    else {
+                        juntaNo((*raiz)->cen, (*raiz)->dir, &(*raiz)->cen);
+                        juntou = 1;
                     }
                     if(!juntou)
                         onda(auxinfo, &((*raiz)->info2), auxpai, &filho, raiz);
@@ -285,12 +321,39 @@ int removerArv23(Arv23PT **raiz, const char *info, const Arv23PT *pai, Arv23PT *
                         if(pai != NULL) {
                             if(*raiz == pai->esq || (pai->ninfos == 2 && (*raiz == pai->cen))) {
                                 filho = menorfilho((*raiz)->cen, &auxpai, &auxinfo);
-                                auxpai =
+                                auxpai = buscapai(*ref, pai->info1.palavra);
+
+                                if(*raiz == pai->esq)
+                                    onda(pai->info1, &(filho->info2), auxpai, ref, ref);
+                                else
+                                    onda(pai->info2, &(filho->info2), auxpai, ref, ref);
+                            }
+                            else {
+                                filho = maiorfilho((*raiz)->esq, &auxpai, &auxinfo);
+                                auxpai = buscapai(*ref, pai->info1.palavra);
+                                filho->info2 = filho->info1;
+                                onda((pai->ninfos == 2 && (*raiz == pai->dir)) ? pai->info2 : pai->info1, &((*raiz)->info1), auxpai, ref, ref);
                             }
                         }
+                        else {
+                            Arv23PT *aux = *raiz;
+                            juntaNo((*raiz)->esq, (*raiz)->cen, raiz);
+                            juntou = 1;
+                            desalocaNo(&aux);
+                        }
                     }
+                    if(pai != NULL && !juntou)
+                        onda(auxinfo, &((*raiz)->info1), auxpai, ref, &filho);
                 }
             }
+        }
+        else {
+            if(strcmp(info, (*raiz)->info1.palavra) < 0)
+                removeu = removerArv23((&(*raiz)->esq), info, *raiz, ref);
+            else if((*raiz)->ninfos == 1 || strcmp(info, (*raiz)->info2.palavra) < 0)
+                removeu = removerArv23((&(*raiz)->cen), info, *raiz, ref);
+            else
+                removeu = removerArv23((&(*raiz)->dir), info, *raiz, ref);
         }
     }
 
