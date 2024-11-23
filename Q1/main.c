@@ -12,26 +12,18 @@ void insere(Arv23PT **pi, const Info info) {
     }
 }
 
-void exibirPTBR(const IngPTBST *raiz) {
-    if (raiz != NULL) {
-        exibirPTBR(raiz->esq);
-        printf("Palavra EN: %s\n", raiz->palavra);
-        exibirPTBR(raiz->dir);
-    }
-}
-
 void exibirEmOrdem(const Arv23PT *ptIn) {
     if (ptIn) {
         exibirEmOrdem(ptIn->esq);
 
         printf("Palavra PT-BR: %s\n", ptIn->info1.palavra);
-        exibirPTBR(ptIn->info1.versaoIng);
+        exibirEN(ptIn->info1.versaoIng);
 
         exibirEmOrdem(ptIn->cen);
 
         if (ptIn->ninfos == 2) {
             printf("Palavra PT-BR: %s\n", ptIn->info2.palavra);
-            exibirPTBR(ptIn->info2.versaoIng);
+            exibirEN(ptIn->info2.versaoIng);
             exibirEmOrdem(ptIn->dir);
         }
     }
@@ -102,7 +94,7 @@ int main() {
     Info info2 = {malloc(strlen("zebra") + 1), NULL, 1};
     strcpy(info2.palavra, "zebra");
 
-    Info info3 = {malloc(strlen("casa") + 1), NULL, 1};
+    Info info3 = {malloc(strlen("casa") + 1), NULL, 2};
     strcpy(info3.palavra, "casa");
 
     Info info4 = {malloc(strlen("abobora") + 1), NULL, 1};
@@ -111,7 +103,7 @@ int main() {
     Info info5 = {malloc(strlen("pera") + 1), NULL, 1};
     strcpy(info5.palavra, "pera");
 
-    Info info6 = {malloc(strlen("uva") + 1), NULL, 1};
+    Info info6 = {malloc(strlen("uva") + 1), NULL, 2};
     strcpy(info6.palavra, "uva");
 
     Arv23PT *pI = NULL; // Inicializa a árvore como vazia
@@ -130,6 +122,8 @@ int main() {
     printf("%s\n", info5.palavra);
     printf("%s\n", info6.palavra);
 
+    printf("\n");
+
     // Insere os elementos na árvore
     insere(&pI, info1);
     insere(&pI, info2);
@@ -142,23 +136,30 @@ int main() {
     adicionarPalavraEN(&pI, "onibus", "Omnibus");
     adicionarPalavraEN(&pI, "onIbuS", "Coach");
 
+    printf("ITEM I TESTE:\n");
+    ExibirPalavrasUnidade(pI, 1);
+
+    printf("ITEM II TESTE:\n");
+    ExibirPalavrasEN(pI, "ONIBUS");
+    printf("\n");
+    
     // Exibe a árvore em ordem
     printf("\nArvore em ordem:\n");
     exibirEmOrdem(pI);
 
-    // Remoções de elementos
-    printf("\nRemovendo elementos:\n");
-    removerElemento(&pI, "rato");
-    removerElemento(&pI, "zebra");
-    removerElemento(&pI, "vento");
+    // // Remoções de elementos
+    // printf("\nRemovendo elementos:\n");
+    // removerElemento(&pI, "rato");
+    // removerElemento(&pI, "zebra");
+    // removerElemento(&pI, "vento");
 
-    // Exibe a árvore novamente após remoções
-    printf("\nArvore em ordem apos remocoes:\n");
-    exibirEmOrdem(pI);
-    printf("\n\n");
-    exibirPreOrdem(pI);
-    printf("\n\n");
-    exibirPosOrdem(pI);
+    // // Exibe a árvore novamente após remoções
+    // printf("\nArvore em ordem apos remocoes:\n");
+    // exibirEmOrdem(pI);
+    // printf("\n\n");
+    // exibirPreOrdem(pI);
+    // printf("\n\n");
+    // exibirPosOrdem(pI);
 
     return 0;
 }

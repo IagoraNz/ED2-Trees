@@ -36,4 +36,16 @@ int removerArv23(Arv23PT **raiz, const char *info, const Arv23PT *pai, Arv23PT *
 void freeTree(Arv23PT *no);
 void toupperString(char *string);
 
+/*
+    Funções Referente ao Item I
+*/
+void exibirEN(const IngPTBST *raiz);
+void ExibirPalavrasUnidade(Arv23PT *raiz, int unidade);
+
+/*
+    Funções Referente ao Item II
+*/
+void ExibirPalavrasEN(Arv23PT *raiz, char *palavraPTBR);
+
+
 #endif

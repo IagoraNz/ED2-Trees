@@ -165,10 +165,60 @@ int insereArvBin(IngPTBST **raiz, const char *palavra) {
 /* (i) informar uma unidade e então imprima todas as palavras da unidade em português seguida das
 equivalentes em inglês */
 
+void exibirEN(const IngPTBST *raiz) {
+    if (raiz != NULL) {
+        exibirEN(raiz->esq);
+        printf("%s, ", raiz->palavra);
+        exibirEN(raiz->dir);
+    }
+}
+
+void ExibirPalavrasUnidade(Arv23PT *raiz, int unidade){
+    if (raiz != NULL){
+        ExibirPalavrasUnidade(raiz->esq, unidade);
+        if (raiz->info1.unidade == unidade){
+            printf("%s: ", raiz->info1.palavra);
+            exibirEN(raiz->info1.versaoIng);
+            printf("\n");
+        }
+
+        ExibirPalavrasUnidade(raiz->cen, unidade);
+
+        if (raiz->ninfos == 2) {
+            if (raiz->info2.unidade == unidade){
+                printf("%s: ", raiz->info2.palavra);
+                exibirEN(raiz->info2.versaoIng);
+                printf("\n");
+            }
+            ExibirPalavrasUnidade(raiz->dir, unidade);
+        }
+    }
+}
+
 /*-----------------------------------------------------------------------------------------------------*/
 
 /* (ii) informar uma palavra em português e então imprima todas as palavras em inglês equivalente à palavra em
 português dada, independente da unidade */
+
+void ExibirPalavrasEN(Arv23PT *raiz, char *palavraPTBR){
+    if (raiz != NULL){
+        ExibirPalavrasEN(raiz->esq, palavraPTBR);
+        if (strcmp(palavraPTBR, raiz->info1.palavra) == 0){
+            printf("Palavras Em Ingles referente a (%s)\n", palavraPTBR);
+            exibirEN(raiz->info1.versaoIng);
+        }
+
+        ExibirPalavrasEN(raiz->cen, palavraPTBR);
+
+        if (raiz->ninfos == 2){
+            if (strcmp(palavraPTBR, raiz->info2.palavra) == 0){
+                printf("Palavras Em Ingles referente a (%s)\n", palavraPTBR);
+                exibirEN(raiz->info2.versaoIng);
+            }
+            ExibirPalavrasEN(raiz->dir, palavraPTBR);
+        }
+    }
+}
 
 /*-----------------------------------------------------------------------------------------------------*/
 
