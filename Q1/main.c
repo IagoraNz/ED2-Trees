@@ -27,7 +27,7 @@ void exibirEmOrdem(const Arv23PT *ptIn) {
         printf("Palavra PT-BR: %s\n", ptIn->info1.palavra);
         exibirPTBR(ptIn->info1.versaoIng);
 
-        exibirEmOrdem(no->cen);
+        exibirEmOrdem(ptIn->cen);
 
         if (ptIn->ninfos == 2) {
             printf("Palavra PT-BR: %s\n", ptIn->info2.palavra);
@@ -136,10 +136,7 @@ int main() {
     insere(&pI, info6);
     insere(&pI, info3);
     insere(&pI, info4);
-    insere(&pI, info7);
-    insere(&pI, info8);
-    insere(&pI, info9);
-    insere(&pI, info10);
+    insere(&pI, info5);
 
     adicionarPalavraEN(&pI, "onibus", "Bus");
     adicionarPalavraEN(&pI, "onibus", "Omnibus");
