@@ -202,13 +202,92 @@ void percorrerArvVP(ArvVP **raiz, const char *palavraEN, int unidade, char *pala
     }
 }
 
-void removerArvVP(ArvVP **raiz, const char *palavraEN, int unidade){
+void move2EsqRed(ArvVP **raiz){
+    trocaCor(raiz);
+    if (pegarCor((*raiz)->dir->esq) == VERMELHO){
+        rotacaoDir(&(*raiz)->dir);
+        rotacaoEsq(raiz);
+        trocaCor(raiz);
+    }
+}
+
+void move2DirRed(ArvVP **raiz){
+    trocaCor(raiz);
+    if (pegarCor((*raiz)->esq->esq) == VERMELHO){
+        rotacaoDir(raiz);
+        trocaCor(raiz);
+    }
+}
+
+ArvVP* procuraMenor(ArvVP *raiz) {
+    ArvVP *no1 = raiz;
+    ArvVP *no2 = raiz->esq;
+    while (no2) {
+        no1 = no2;
+        no2 = no2->esq;
+    }
+    return no1;
+}
+
+int removerMenor(ArvVP **raiz) {
+    if (!(*raiz)->esq) {
+        free(*raiz);
+        *raiz = NULL;
+    } else {
+        if (pegarCor((*raiz)->esq) == PRETO && pegarCor((*raiz)->esq->esq) == PRETO) {
+            move2EsqRed(raiz);
+        }
+        removerMenor(&(*raiz)->esq);
+    }
+    if (*raiz) {
+        balancear(raiz);
+    }
+}
+
+int removerArvVP(ArvVP **raiz, char *palavraPT) {
+    int removido = 0;
+    if (*raiz) {
+        if (strcmp(palavraPT, (*raiz)->info.palavraPortugues) < 0) {
+            if (pegarCor((*raiz)->esq) == PRETO && pegarCor((*raiz)->esq->esq) == PRETO)
+                move2EsqRed(raiz);
+            removido = removerArvVP(&(*raiz)->esq, palavraPT);
+        } else {
+            if (pegarCor((*raiz)->esq) == VERMELHO)
+                rotacaoDir(raiz);
+            if (!strcmp(palavraPT, (*raiz)->info.palavraPortugues) && !(*raiz)->dir) {
+                free(*raiz);
+                *raiz = NULL;
+                return 1;
+            }
+            if (pegarCor((*raiz)->dir) == PRETO && pegarCor((*raiz)->dir->esq) == PRETO)
+                move2DirRed(raiz);
+            if (!strcmp(palavraPT, (*raiz)->info.palavraPortugues)) {
+                ArvVP *aux = procuraMenor((*raiz)->dir);
+                (*raiz)->info = aux->info;
+                removerMenor(&(*raiz)->dir);
+                removido = 1;
+            } else {
+                removido = removerArvVP(&(*raiz)->dir, palavraPT);
+            }
+        }
+    }
+    if (*raiz) {
+        balancear(raiz);
+    }
+    return removido;
+}
+
+void removerPrincipal(ArvVP **raiz, const char *palavraEN, int unidade){
     char palavraPT[50];
     int remover = 0;
     percorrerArvVP(raiz, palavraEN, unidade, palavraPT, &remover);
     if (remover){
-        printf("FUNÇAO DE REMOVER NO AQUI\n");
-        printf("Palavra PT: %s\n", palavraPT);
+        int sucesso = 0;
+        sucesso = removerArvVP(raiz, palavraPT);
+        if (!sucesso)
+            printf("Erro ao remover.\n");
+        else
+            printf("Remocao bem-sucedida!\n");
     }
     if ((*raiz) != NULL)
         (*raiz)->cor = PRETO;

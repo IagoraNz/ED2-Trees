@@ -58,7 +58,7 @@ int main()
 
     exibirArvVP(raiz);
 
-    removerArvVP(&raiz, "Bus", 1);
+    removerPrincipal(&raiz, "Bus", 1);
 
     exibirArvVP(raiz);
 
