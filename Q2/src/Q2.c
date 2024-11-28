@@ -101,6 +101,7 @@ void exibirArvBin(IngPTBST *raiz){
     if(raiz != NULL){
         exibirArvBin(raiz->esq);
         printf("%s\n", raiz->info.palavraIngles);
+        printf("Unidade: %d\n", raiz->info.unidade);
         exibirArvBin(raiz->dir);
     }
 }
