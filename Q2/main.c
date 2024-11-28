@@ -81,5 +81,14 @@ int main() {
     // Fechar o arquivo após a leitura
     fclose(arquivo);
     exibirArvVP(raiz); // Exibir a árvore
+
+    removerArvVPEN(&raiz, "Bus", 1);
+    printf("\n");
+    exibirArvVP(raiz);
+    printf("\n");
+    printf("PalavraArv: %s\n", raiz->info.palavraPortugues);
+    removerArvVPPTBR(&raiz, " bicicleta", 1);
+    printf("\n");
+    exibirArvVP(raiz);
     return 0;
 }

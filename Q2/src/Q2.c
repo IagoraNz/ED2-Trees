@@ -278,7 +278,7 @@ int removerArvVP(ArvVP **raiz, char *palavraPT) {
     return removido;
 }
 
-void removerPrincipal(ArvVP **raiz, const char *palavraEN, int unidade){
+void removerArvVPEN(ArvVP **raiz, const char *palavraEN, int unidade){
     char palavraPT[50];
     int remover = 0;
     percorrerArvVP(raiz, palavraEN, unidade, palavraPT, &remover);
@@ -300,3 +300,56 @@ deve remover a palavra em inglês da árvore binária correspondente a palavra e
 unidade. Caso ela seja a única palavra na árvore binária, a palavra em português deve ser removida da 
 árvore Rubro Negra.  
 */
+
+void buscarPalavraEN(IngPTBST *raiz, int unidade, char *palavraEN, int *encontrou){
+    if (raiz != NULL){
+        if (*encontrou != 1)
+            buscarPalavraEN(raiz->esq, unidade, palavraEN, encontrou);
+        if (raiz->info.unidade == unidade){
+            strcpy(palavraEN, raiz->info.palavraIngles);
+            *encontrou = 1;
+        }
+        if (*encontrou != 1)
+            buscarPalavraEN(raiz->dir, unidade, palavraEN, encontrou);
+    }
+}
+
+int percorrerArvVPPTBR(ArvVP **raiz, char *palavraPT, int unidade, int *remover){
+    if ((*raiz) != NULL){
+        if (strcmp(palavraPT, (*raiz)->info.palavraPortugues) == 0){
+            char palavraEN[50];
+            int encontrou = 0;
+            buscarPalavraEN((*raiz)->info.arvBinIngles, unidade, palavraEN, &encontrou);
+            if (encontrou == 1){
+                encontrou = removerPalavraEN(&(*raiz)->info.arvBinIngles, palavraEN, unidade);
+                if (encontrou == 1 && (*raiz)->info.arvBinIngles == NULL){
+                    printf("Encontrou!\n");
+                    *remover = 1;
+                }
+            }
+        }else
+        {
+            if (strcmp(palavraPT, (*raiz)->info.palavraPortugues) < 0)
+                percorrerArvVPPTBR(&(*raiz)->esq, palavraPT, unidade, remover);
+            else
+                percorrerArvVPPTBR(&(*raiz)->dir, palavraPT, unidade, remover);
+        } 
+    }
+}
+
+void removerArvVPPTBR(ArvVP **raiz, char *palavraPT, int unidade){
+    int remover = 0;
+    percorrerArvVPPTBR(raiz, palavraPT, unidade, &remover);
+    printf("Remover: %d\n", remover);
+    if (remover == 1){
+        int sucesso = 0;
+        sucesso = removerArvVP(raiz, palavraPT);
+        if (!sucesso)
+            printf("Erro ao remover.\n");
+        else
+            printf("Remocao bem-sucedida!\n");
+    }
+
+    if ((*raiz) != NULL)
+        (*raiz)->cor = PRETO;
+}

@@ -47,6 +47,8 @@ int inserirArvVP(ArvVP **raiz, InfoArvBin info);
 
 void exibirArvBin(IngPTBST *raiz);
 
-void removerPrincipal(ArvVP **raiz, const char *palavraEN, int unidade);
+void removerArvVPEN(ArvVP **raiz, const char *palavraEN, int unidade);
+
+void removerArvVPPTBR(ArvVP **raiz, char *palavraPT, int unidade);
 
 #endif
