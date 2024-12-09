@@ -45,10 +45,12 @@ typedef struct arvvp
 
 int inserirArvVP(ArvVP **raiz, InfoArvBin info);
 
-void exibirArvBin(IngPTBST *raiz);
-
 void removerArvVPEN(ArvVP **raiz, const char *palavraEN, int unidade);
 
 void removerArvVPPTBR(ArvVP **raiz, char *palavraPT, int unidade);
+
+void exibirUnidade(ArvVP *raiz, int unidade, int *enc);
+
+void exibirArvBinPT(ArvVP *raiz, char *palavra);
 
 #endif
