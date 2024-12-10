@@ -97,23 +97,40 @@ int inserirArvVP(ArvVP **raiz, InfoArvBin info){
 equivalentes em inglês; 
 */
 
-void exibirArvBin(IngPTBST *raiz){
+void exibirArvBin(IngPTBST *raiz, int unidade){
     if(raiz != NULL){
-        exibirArvBin(raiz->esq);
-        printf("%s\n", raiz->info.palavraIngles);
-        printf("Unidade: %d\n", raiz->info.unidade);
-        exibirArvBin(raiz->dir);
+        exibirArvBin(raiz->esq, unidade);
+        if (raiz->info.unidade == unidade){
+            printf("%s\n", raiz->info.palavraIngles);
+            printf("Unidade: %d\n", raiz->info.unidade);
+        }
+        exibirArvBin(raiz->dir, unidade);
     }
 }
 
-void exibirUnidade(ArvVP *raiz, int unidade){
+int buscarUnidade(IngPTBST *raiz, int unidade){
+    int encontrou = 0;
     if (raiz != NULL){
-        exibirUnidade(raiz->esq, unidade);
-        if (raiz->info.arvBinIngles->info.unidade == unidade){
-            printf("Palavra PT-BR: %s\nPalavras EN:\n", raiz->info.palavraPortugues);
-            exibirArvBin(raiz->info.arvBinIngles);
+        encontrou = buscarUnidade(raiz->esq, unidade);
+        if (raiz->info.unidade == unidade){
+            encontrou = 1;
         }
-        exibirUnidade(raiz->dir, unidade);
+        if (encontrou != 1)
+            encontrou = buscarUnidade(raiz->dir, unidade);
+    }
+    return encontrou;
+}
+
+void exibirUnidade(ArvVP *raiz, int unidade, int *enc){
+    if (raiz != NULL){
+        exibirUnidade(raiz->esq, unidade, enc);
+        *enc = buscarUnidade(raiz->info.arvBinIngles, unidade);
+        if (*enc == 1){
+            printf("%s\n", raiz->info.palavraPortugues);
+            exibirArvBin(raiz->info.arvBinIngles, unidade);
+            printf("\n");
+        }
+        exibirUnidade(raiz->dir, unidade, enc);
     }
 }
 
@@ -121,13 +138,20 @@ void exibirUnidade(ArvVP *raiz, int unidade){
 (ii)informar uma palavra em português e então imprima todas as palavras em inglês equivalente a palavra em 
 português dada, independente da unidade; 
 */
+void exibirPalavrasIngles(IngPTBST *raiz){
+    if(raiz != NULL){
+        exibirPalavrasIngles(raiz->esq);
+        printf("%s\n", raiz->info.palavraIngles);
+        exibirPalavrasIngles(raiz->dir);
+    }
+}
 
-void exibirArvBinPT(IngPTBST *raiz, char *palavra){
+void exibirArvBinPT(ArvVP *raiz, char *palavra){
     if(raiz != NULL){
         exibirArvBinPT(raiz->esq, palavra);
-        if (strcmp(raiz->info.palavraIngles, palavra) == 0){
-            printf("Palavra PT-BR: %s\nPalavras EN:\n", raiz->info.palavraIngles);
-            exibirArvBin(raiz);
+        if (strcmp(raiz->info.palavraPortugues, palavra) == 0){
+            printf("Palavra PT-BR: %s\nPalavras EN:\n", raiz->info.palavraPortugues);
+            exibirPalavrasIngles(raiz->info.arvBinIngles);
         }
         exibirArvBinPT(raiz->dir, palavra);
     }
