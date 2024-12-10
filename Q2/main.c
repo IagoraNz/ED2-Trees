@@ -15,22 +15,13 @@ void insere(ArvVP **raiz, InfoArvBin info) {
     (*raiz)->cor = 1;
 }
 
-// void exibirArvVP(ArvVP *raiz) {
-//     if (raiz != NULL) {
-//         exibirArvVP(raiz->esq);
-//         printf("PALAVRA-PTBR: %s\nPALAVRASEN:\n", raiz->info.palavraPortugues);
-//         printf("Cor: %d\n", raiz->cor);
-//         exibirArvBin(raiz->info.arvBinIngles);
-//         exibirArvVP(raiz->dir);
-//     }
-// }
-
 void menu() {
     printf("\n==============================================\n");
     printf("1 - Palavras por Unidade\n");
     printf("2 - Palavras em Portugues\n");
     printf("3 - Remover palavra em Ingles\n");
     printf("4 - Remover palavra em Portugues\n");
+    printf("5 - Metrificar tempo busca\n");
     printf("0 - Sair\n");
     printf("==============================================\n");
     printf("Opcao: ");
