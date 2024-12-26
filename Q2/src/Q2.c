@@ -3,6 +3,15 @@
 #include <string.h>
 #include "../src/Q2.h"
 
+void inserirunidade(Unidades **unidades, int unidade){
+    if (*unidades == NULL){
+        *unidades = (Unidades*)malloc(sizeof(Unidades));
+        (*unidades)->unidade = unidade;
+        (*unidades)->prox = NULL;
+    } else
+        inserirunidade(&(*unidades)->prox, unidade);
+}
+
 void inserirArvBin(IngPTBST **raiz, InfoArvoreIngPTBST info){
     if(*raiz == NULL){
         *raiz = (IngPTBST*)malloc(sizeof(IngPTBST));
@@ -11,7 +20,10 @@ void inserirArvBin(IngPTBST **raiz, InfoArvoreIngPTBST info){
         (*raiz)->dir = NULL;
     } else
     {
-        if (strcmp((*raiz)->info.palavraIngles, info.palavraIngles) > 0)
+        if (strcmp((*raiz)->info.palavraIngles, info.palavraIngles) == 0){
+            inserirunidade(&(*raiz)->info.unidades, info.unidades->unidade);
+        }
+        else if (strcmp((*raiz)->info.palavraIngles, info.palavraIngles) > 0)
             inserirArvBin(&(*raiz)->esq, info);
         else
             inserirArvBin(&(*raiz)->dir, info);
@@ -97,39 +109,60 @@ int inserirArvVP(ArvVP **raiz, InfoArvBin info){
 equivalentes em inglês; 
 */
 
-void exibirArvBin(IngPTBST *raiz, int unidade){
-    if(raiz != NULL){
-        exibirArvBin(raiz->esq, unidade);
-        if (raiz->info.unidade == unidade){
-            printf("%s\n", raiz->info.palavraIngles);
-            printf("Unidade: %d\n", raiz->info.unidade);
+int unidadePresente(Unidades *unidades, int unidade) {
+    int resultado = 0;
+    if (unidades != NULL) {
+        if (unidades->unidade == unidade) {
+            resultado = 1; 
+        } else {
+            resultado = unidadePresente(unidades->prox, unidade); 
         }
+    }
+    return resultado;
+}
+
+void exibirArvBin(IngPTBST *raiz, int unidade) {
+    if (raiz != NULL) {
+        exibirArvBin(raiz->esq, unidade);
+
+        int presente = unidadePresente(raiz->info.unidades, unidade);
+        if (presente) {
+            printf("%s\n", raiz->info.palavraIngles);
+            printf("Unidade: %d\n", unidade);
+        }
+
         exibirArvBin(raiz->dir, unidade);
     }
 }
 
-int buscarUnidade(IngPTBST *raiz, int unidade){
+
+int buscarUnidade(IngPTBST *raiz, int unidade) {
     int encontrou = 0;
-    if (raiz != NULL){
-        encontrou = buscarUnidade(raiz->esq, unidade);
-        if (raiz->info.unidade == unidade){
+    if (raiz != NULL) {
+        int presente = unidadePresente(raiz->info.unidades, unidade);
+        if (presente) {
             encontrou = 1;
+        } else {
+            int encontrouEsq = buscarUnidade(raiz->esq, unidade);
+            int encontrouDir = buscarUnidade(raiz->dir, unidade);
+            encontrou = encontrouEsq || encontrouDir; 
         }
-        if (encontrou != 1)
-            encontrou = buscarUnidade(raiz->dir, unidade);
     }
     return encontrou;
 }
 
-void exibirUnidade(ArvVP *raiz, int unidade, int *enc){
-    if (raiz != NULL){
+void exibirUnidade(ArvVP *raiz, int unidade, int *enc) {
+    if (raiz != NULL) {
         exibirUnidade(raiz->esq, unidade, enc);
-        *enc = buscarUnidade(raiz->info.arvBinIngles, unidade);
-        if (*enc == 1){
+
+        int encontrou = buscarUnidade(raiz->info.arvBinIngles, unidade);
+        if (encontrou) {
+            *enc = 1;
             printf("%s\n", raiz->info.palavraPortugues);
             exibirArvBin(raiz->info.arvBinIngles, unidade);
             printf("\n");
         }
+
         exibirUnidade(raiz->dir, unidade, enc);
     }
 }
@@ -187,26 +220,44 @@ IngPTBST* menorfilhoesq(IngPTBST *raiz){
     return aux;
 }
 
+Unidades* removerUnidadeRecursivo(Unidades *unidades, int unidade, int *removido) {
+    Unidades *prox = unidades;
+    if (unidades != NULL) {
+        if (unidades->unidade == unidade) {
+            prox = unidades->prox; 
+            free(unidades);
+            *removido = 1;
+        } else {
+            unidades->prox = removerUnidadeRecursivo(unidades->prox, unidade, removido);
+        }
+    }
+    return prox;
+}
+
 int removerPalavraEN(IngPTBST **raiz, const char *palavraEN, int unidade){
     int encontrou = 0;
     if ((*raiz) != NULL){
-        if (strcmp((*raiz)->info.palavraIngles, palavraEN) == 0 && (*raiz)->info.unidade == unidade){
-            IngPTBST *aux = *raiz;
-            if (ehfolha(*raiz)){
-                free(aux);
-                *raiz = NULL;
-            } else if (soumfilho(*raiz)){
-                IngPTBST *aux = *raiz;
-                *raiz = soumfilho(*raiz);
-                free(aux);
-            } else {
-                IngPTBST *aux = menorfilhoesq((*raiz)->dir);
-                (*raiz)->info = aux->info;
-                removerPalavraEN(&(*raiz)->dir, aux->info.palavraIngles, aux->info.unidade);
+        if (strcmp((*raiz)->info.palavraIngles, palavraEN) == 0){
+            int unidadeRemovida = 0;
+            (*raiz)->info.unidades = removerUnidadeRecursivo((*raiz)->info.unidades, unidade, &unidadeRemovida);
+            if (unidadeRemovida){
+                encontrou = 1;
+                if ((*raiz)->info.unidades == NULL){
+                    IngPTBST *aux = *raiz;
+                    if (ehfolha(*raiz)){
+                        free(aux);
+                        *raiz = NULL;
+                    } else if (soumfilho(*raiz)){
+                        IngPTBST *aux = *raiz;
+                        *raiz = soumfilho(*raiz);
+                        free(aux);
+                    } else {
+                        IngPTBST *aux = menorfilhoesq((*raiz)->dir);
+                        (*raiz)->info = aux->info;
+                        removerPalavraEN(&(*raiz)->dir, aux->info.palavraIngles, unidade);
+                    }
+                }
             }
-
-            encontrou = 1;
-
         } else if (strcmp((*raiz)->info.palavraIngles, palavraEN) > 0)
             encontrou = removerPalavraEN(&(*raiz)->esq, palavraEN, unidade);
         else
@@ -215,15 +266,16 @@ int removerPalavraEN(IngPTBST **raiz, const char *palavraEN, int unidade){
     return encontrou;
 }
 
-void percorrerArvVP(ArvVP **raiz, const char *palavraEN, int unidade, char *palavraPT, int *remover){
+void percorrerArvVP(ArvVP **raiz, const char *palavraEN, int unidade, char palavrasPT[][50], int *remover, int *removerCount){
     if ((*raiz) != NULL){
-        percorrerArvVP(&(*raiz)->esq, palavraEN, unidade, palavraPT, remover);
+        percorrerArvVP(&(*raiz)->esq, palavraEN, unidade, palavrasPT, remover, removerCount);
         int encontrou = removerPalavraEN(&(*raiz)->info.arvBinIngles, palavraEN, unidade);
         if (encontrou && (*raiz)->info.arvBinIngles == NULL){
             *remover = 1;
-            strcpy(palavraPT, (*raiz)->info.palavraPortugues);
+            strcpy(palavrasPT[*removerCount], (*raiz)->info.palavraPortugues);
+            (*removerCount)++;
         }
-        percorrerArvVP(&(*raiz)->dir, palavraEN, unidade, palavraPT, remover);
+        percorrerArvVP(&(*raiz)->dir, palavraEN, unidade, palavrasPT, remover, removerCount);
     }
 }
 
@@ -303,16 +355,19 @@ int removerArvVP(ArvVP **raiz, char *palavraPT) {
 }
 
 void removerArvVPEN(ArvVP **raiz, const char *palavraEN, int unidade){
-    char palavraPT[50];
+    char palavraPT[100][50];
     int remover = 0;
-    percorrerArvVP(raiz, palavraEN, unidade, palavraPT, &remover);
+    int removerCount = 0;
+    percorrerArvVP(raiz, palavraEN, unidade, palavraPT, &remover, &removerCount);
     if (remover){
-        int sucesso = 0;
-        sucesso = removerArvVP(raiz, palavraPT);
-        if (!sucesso)
-            printf("Erro ao remover.\n");
-        else
-            printf("Remocao bem-sucedida!\n");
+        for (int i = 0; i < removerCount; i++){
+            int sucesso = 0;
+            sucesso = removerArvVP(raiz, palavraPT[i]);
+            if (!sucesso)
+                printf("Erro ao remover.\n");
+            else
+                printf("Remocao bem-sucedida!\n");
+        }
     }
     if ((*raiz) != NULL)
         (*raiz)->cor = PRETO;
@@ -324,48 +379,61 @@ deve remover a palavra em inglês da árvore binária correspondente a palavra e
 unidade. Caso ela seja a única palavra na árvore binária, a palavra em português deve ser removida da 
 árvore Rubro Negra.  
 */
+int procurarUnidade(Unidades *unidades, int unidade) {
+    int encontrou = 0;
+    if (unidades != NULL) {
+        if (unidades->unidade == unidade)
+            encontrou = 1;
+        else
+            encontrou = procurarUnidade(unidades->prox, unidade);
+    }
+    return encontrou;
+}
 
-void buscarPalavraEN(IngPTBST *raiz, int unidade, char *palavraEN, int *encontrou){
-    if (raiz != NULL){
-        if (*encontrou != 1)
-            buscarPalavraEN(raiz->esq, unidade, palavraEN, encontrou);
-        if (raiz->info.unidade == unidade){
+void buscarPalavraEN(IngPTBST *raiz, int unidade, char *palavraEN, int *encontrou) {
+    if (raiz != NULL && *encontrou != 1) {
+        buscarPalavraEN(raiz->esq, unidade, palavraEN, encontrou);
+
+        if (*encontrou != 1 && procurarUnidade(raiz->info.unidades, unidade)) {
             strcpy(palavraEN, raiz->info.palavraIngles);
             *encontrou = 1;
         }
+
         if (*encontrou != 1)
             buscarPalavraEN(raiz->dir, unidade, palavraEN, encontrou);
     }
 }
 
-int percorrerArvVPPTBR(ArvVP **raiz, char *palavraPT, int unidade, int *remover){
-    if ((*raiz) != NULL){
-        if (strcmp(palavraPT, (*raiz)->info.palavraPortugues) == 0){
+int percorrerArvVPPTBR(ArvVP **raiz, char *palavraPT, int unidade, int *remover) {
+    if ((*raiz) != NULL) {
+        if (strcmp(palavraPT, (*raiz)->info.palavraPortugues) == 0) {
             char palavraEN[50];
             int encontrou = 0;
+
             buscarPalavraEN((*raiz)->info.arvBinIngles, unidade, palavraEN, &encontrou);
-            if (encontrou == 1){
+
+            if (encontrou == 1) {
                 encontrou = removerPalavraEN(&(*raiz)->info.arvBinIngles, palavraEN, unidade);
-                if (encontrou == 1 && (*raiz)->info.arvBinIngles == NULL){
+                if (encontrou == 1 && (*raiz)->info.arvBinIngles == NULL) {
                     printf("Encontrou!\n");
                     *remover = 1;
                 }
             }
-        }else
-        {
+        } else {
             if (strcmp(palavraPT, (*raiz)->info.palavraPortugues) < 0)
                 percorrerArvVPPTBR(&(*raiz)->esq, palavraPT, unidade, remover);
             else
                 percorrerArvVPPTBR(&(*raiz)->dir, palavraPT, unidade, remover);
-        } 
+        }
     }
+    return *remover;
 }
 
-void removerArvVPPTBR(ArvVP **raiz, char *palavraPT, int unidade){
+void removerArvVPPTBR(ArvVP **raiz, char *palavraPT, int unidade) {
     int remover = 0;
     percorrerArvVPPTBR(raiz, palavraPT, unidade, &remover);
     printf("Remover: %d\n", remover);
-    if (remover == 1){
+    if (remover == 1) {
         int sucesso = 0;
         sucesso = removerArvVP(raiz, palavraPT);
         if (!sucesso)

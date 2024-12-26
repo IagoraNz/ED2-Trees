@@ -5,10 +5,16 @@
     Estruturas de Árvores Binarias e Árvore Vermelho e Preta
 */
 
+typedef struct unidades
+{
+  int unidade;
+  struct unidades *prox;
+} Unidades;
+
 typedef struct infoArvoreingptbst
 {
   char *palavraIngles;
-  int unidade;
+  Unidades *unidades;
 } InfoArvoreIngPTBST;
 
 typedef struct ingptbst
