@@ -27,6 +27,31 @@ void menu() {
     printf("Opcao: ");
 }
 
+void exibirUnidades(Unidades *raiz){
+    if (raiz != NULL){
+        printf("%d, ", raiz->unidade);
+        exibirUnidades(raiz->prox);
+    }
+}
+
+void exibirIngles(IngPTBST *raiz){
+    if (raiz != NULL){
+        exibirIngles(raiz->esq);
+        printf("%s, ", raiz->info.palavraIngles);
+        exibirUnidades(raiz->info.unidades);
+        exibirIngles(raiz->dir);
+    }
+}
+
+void exibirPalavras(ArvVP *raiz){
+    if (raiz != NULL){
+        exibirPalavras(raiz->esq);
+        printf("%s: ", raiz->info.palavraPortugues);
+        exibirIngles(raiz->info.arvBinIngles);
+        exibirPalavras(raiz->dir);
+    }
+}
+
 int main() {
     ArvVP *raiz = NULL;
     char linha[200];
@@ -66,13 +91,16 @@ int main() {
                         InfoArvBin info;
                         info.palavraPortugues = (char *)malloc(50 * sizeof(char));
                         info.arvBinIngles = (IngPTBST *)malloc(sizeof(IngPTBST));
+                        info.arvBinIngles->info.unidades = (Unidades *)malloc(sizeof(Unidades));
+                        info.arvBinIngles->info.unidades->prox = NULL;
                         info.arvBinIngles->esq = NULL;
                         info.arvBinIngles->dir = NULL;
                         info.arvBinIngles->info.palavraIngles = (char *)malloc(50 * sizeof(char));
 
                         strcpy(info.palavraPortugues, palavra); 
                         strcpy(info.arvBinIngles->info.palavraIngles, palavraIN); 
-                        info.arvBinIngles->info.unidade = unidadeAtual; 
+                        info.arvBinIngles->info.unidades->unidade = unidadeAtual;
+
                         insere(&raiz, info); 
                         palavra = strtok(NULL, ","); // Próxima palavra em português
                     }
@@ -83,13 +111,13 @@ int main() {
         // Fechar o arquivo após a leitura
         fclose(arquivo);
         int enc = 0;
-
-        exibirUnidade(raiz, 2, &enc);
-
         int op = 0, unidade = 0;
         char palavra[50];
+
+        
         do
         {
+            exibirPalavras(raiz);
             enc = 0;
             menu();
             scanf("%d", &op);
