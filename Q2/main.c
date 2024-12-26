@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "src/Q2.h"
 
 void insere(ArvVP **raiz, InfoArvBin info) {
@@ -52,10 +53,16 @@ void exibirPalavras(ArvVP *raiz){
     }
 }
 
+void ltrim(char *str) {
+    if (str != NULL && str[0] == ' ') {
+        memmove(str, str + 1, strlen(str)); 
+    }
+}
+
 int main() {
     ArvVP *raiz = NULL;
     char linha[200];
-    int unidadeAtual = 0, sucesso = 1; // Para controlar a unidade atual
+    int unidadeAtual = 0, sucesso = 1;
 
     // Iniciando Leitura do Arquivo exemplo.txt
     FILE *arquivo;
@@ -82,6 +89,7 @@ int main() {
                 if (token != NULL) {
                     strcpy(palavraIN, token);
                 }
+                ltrim(palavraIN);
 
                 // Processar as palavras em português (à direita do ':')
                 token = strtok(NULL, ";");
@@ -97,6 +105,8 @@ int main() {
                         info.arvBinIngles->dir = NULL;
                         info.arvBinIngles->info.palavraIngles = (char *)malloc(50 * sizeof(char));
 
+                        ltrim(palavra);
+                        printf("Palavra: %s\n", palavra);
                         strcpy(info.palavraPortugues, palavra); 
                         strcpy(info.arvBinIngles->info.palavraIngles, palavraIN); 
                         info.arvBinIngles->info.unidades->unidade = unidadeAtual;
@@ -114,7 +124,6 @@ int main() {
         int op = 0, unidade = 0;
         char palavra[50];
 
-        
         do
         {
             exibirPalavras(raiz);
