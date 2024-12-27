@@ -8,7 +8,8 @@ void inserirunidade(Unidades **unidades, int unidade){
         *unidades = (Unidades*)malloc(sizeof(Unidades));
         (*unidades)->unidade = unidade;
         (*unidades)->prox = NULL;
-    } else
+    } 
+    else
         inserirunidade(&(*unidades)->prox, unidade);
 }
 
@@ -18,11 +19,10 @@ void inserirArvBin(IngPTBST **raiz, InfoArvoreIngPTBST info){
         (*raiz)->info = info;
         (*raiz)->esq = NULL;
         (*raiz)->dir = NULL;
-    } else
-    {
-        if (strcmp((*raiz)->info.palavraIngles, info.palavraIngles) == 0){
+    } 
+    else{
+        if (strcmp((*raiz)->info.palavraIngles, info.palavraIngles) == 0)
             inserirunidade(&(*raiz)->info.unidades, info.unidades->unidade);
-        }
         else if (strcmp((*raiz)->info.palavraIngles, info.palavraIngles) > 0)
             inserirArvBin(&(*raiz)->esq, info);
         else
