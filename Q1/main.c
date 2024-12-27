@@ -56,13 +56,15 @@ int adicionarPalavraEN(Arv23PT **raiz, char *palavraPTBR, char *palavraIngles) {
 void exibirPreOrdem(const Arv23PT *no ){
     if (no) {
         printf("%s\n", no->info1.palavra);
+
+        if(no->ninfos == 2)
+            printf(("%s\n"), no->info2.palavra);
+
         exibirPreOrdem(no->esq);
         exibirPreOrdem(no->cen);
 
-        if (no->ninfos == 2) {
-            printf("%s\n", no->info2.palavra);
+        if (no->ninfos == 2)
             exibirPreOrdem(no->dir);
-        }
     }
 }
 
@@ -71,20 +73,19 @@ void exibirPosOrdem(const Arv23PT *no ){
         exibirPosOrdem(no->esq);
         exibirPosOrdem(no->cen);
 
-        if (no->ninfos == 2) {
+        if (no->ninfos == 2)
             exibirPosOrdem(no->dir);
-            printf("%s\n", no->info2.palavra);
-        }
 
         printf("%s\n", no->info1.palavra);
+
+        if(no->ninfos == 2)
+            printf("%s\n", no->info2.palavra);
     }
 }
 
 void removerElemento(Arv23PT **raiz, const char *palavra) {
-    if (removerArv23(raiz, palavra, NULL, raiz))
-        printf("Elemento '%s' removido com sucesso.\n", palavra);
-    else
-        printf("Elemento '%s' nao encontrado.\n", palavra);
+    removerArv23(raiz, palavra, NULL, raiz);
+    printf("Elemento '%s' removido com sucesso.\n", palavra);
 }
 
 int main() {
@@ -147,19 +148,25 @@ int main() {
     printf("\nArvore em ordem:\n");
     exibirEmOrdem(pI);
 
-    // // Remoções de elementos
-    // printf("\nRemovendo elementos:\n");
-    // removerElemento(&pI, "rato");
-    // removerElemento(&pI, "zebra");
-    // removerElemento(&pI, "vento");
+    // Remoções de elementos
+    printf("\nRemovendo elementos:\n");
+    removerElemento(&pI, "rato");
+    printf("\nArvore em ordem apos remocoes:\n");
+    exibirEmOrdem(pI);
+    removerElemento(&pI, "zebra");
+    printf("\nArvore em ordem apos remocoes:\n");
+    exibirEmOrdem(pI);
+    removerElemento(&pI, "vento");
+    printf("\nArvore em ordem apos remocoes:\n");
+    exibirEmOrdem(pI);
 
-    // // Exibe a árvore novamente após remoções
-    // printf("\nArvore em ordem apos remocoes:\n");
-    // exibirEmOrdem(pI);
-    // printf("\n\n");
-    // exibirPreOrdem(pI);
-    // printf("\n\n");
-    // exibirPosOrdem(pI);
+    // Exibe a árvore novamente após remoções
+    printf("\nArvore em ordem apos remocoes:\n");
+    exibirEmOrdem(pI);
+    printf("\n\n");
+    exibirPreOrdem(pI);
+    printf("\n\n");
+    exibirPosOrdem(pI);
 
     return 0;
 }
