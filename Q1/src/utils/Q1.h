@@ -5,24 +5,15 @@
 
 /* ESTRUTAS DAS ÁRVORES E DEMAIS */
 
-typedef struct unidades {
-    int unidade;
-    struct unidades *prox;
-} Unidades;
-
-typedef struct infobst {
-    char *palavra;
-    Unidades *unidades;
-} InfoBST;
-
 typedef struct ingptbst{
-    InfoBST *info;
+    char *palavra;
     struct ingptbst *dir,*esq;
 } IngPTBST;
 
 typedef struct info {
     char *palavra;
     IngPTBST *versaoIng;
+    int unidade;
 } Info;
 
 typedef struct Arv23pt{
@@ -38,10 +29,10 @@ typedef struct Arv23pt{
 
 /* FUNÇÕES ADICIONAIS */
 
-Arv23PT *criaNo(Info info, Arv23PT * pi, Arv23PT * arv23_pt);
+Arv23PT * criaNo(Info info, Arv23PT * pi, Arv23PT * arv23_pt);
 Arv23PT *inserirArv23(Arv23PT **no, Info informacao, Info *promove, Arv23PT **pai);
 int insereArvBin(IngPTBST **raiz, const char *palavra);
-int removerArv23(Arv23PT **raiz, const char *info, const Arv23PT *pai, Arv23PT **ref);
+int removerArv23(Arv23PT **raiz, const char *info, Arv23PT *pai, Arv23PT **ref);
 void freeTree(Arv23PT *no);
 void toupperString(char *string);
 
@@ -49,12 +40,12 @@ void toupperString(char *string);
     Funções Referente ao Item I
 */
 void exibirEN(const IngPTBST *raiz);
-void ExibirPalavrasUnidade(Arv23PT *raiz, int unidade);
+void ExibirPalavrasUnidade(const Arv23PT *raiz, int unidade);
 
 /*
     Funções Referente ao Item II
 */
-void ExibirPalavrasEN(Arv23PT *raiz, char *palavraPTBR);
+void ExibirPalavrasEN(const Arv23PT *raiz, char *palavraPTBR);
 
 
 #endif
