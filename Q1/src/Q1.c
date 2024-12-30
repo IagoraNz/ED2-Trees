@@ -25,12 +25,10 @@ Arv23PT *criaNo(const Info informacao, Arv23PT *filhoesq, Arv23PT *filhocen){
         printf("Nao foi possivel criar no\n");
     }
 
-    if(no){
-        no->info1 = informacao;
-        no->esq = filhoesq;
-        no->cen = filhocen;
-        no->ninfos = 1;
-    }
+    no->info1 = informacao;
+    no->esq = filhoesq;
+    no->cen = filhocen;
+    no->ninfos = 1;
 
     return no;
 }
@@ -43,36 +41,36 @@ void adicionaChave(Arv23PT *no, const Info informacao, Arv23PT *filho){
     else{
         no->info2 = no->info1;
         no->dir = no->cen;
-        no->info1 = informacao;
         no->cen = filho;
+        no->info1 = informacao;
     }
     no->ninfos = 2;
 }
 
-Arv23PT *quebraNo(Arv23PT **no, const Info informacao, Info *promove, Arv23PT **filho){
+Arv23PT *quebraNo(Arv23PT *no, const Info informacao, Info *promove, Arv23PT **filho){
     Arv23PT *maior;
 
-    if(strcmp(informacao.palavra, (*no)->info2.palavra) > 0){
-        *promove = (*no)->info2;
+    if(strcmp(informacao.palavra, no->info2.palavra) > 0){
+        *promove = no->info2;
         if(filho)
-            maior = criaNo(informacao, (*no)->dir, *filho);
+            maior = criaNo(informacao, no->dir, *filho);
         else
-            maior = criaNo(informacao, (*no)->dir,  NULL);
+            maior = criaNo(informacao, no->dir,  NULL);
     }
-    else if(strcmp(informacao.palavra, (*no)->info1.palavra) > 0){
+    else if(strcmp(informacao.palavra, no->info1.palavra) > 0){
         *promove = informacao;
         if(filho)
-            maior = criaNo((*no)->info2, *filho, (*no)->dir);
+            maior = criaNo(no->info2, *filho, no->dir);
         else
-            maior = criaNo((*no)->info2, NULL, (*no)->dir);
+            maior = criaNo(no->info2, NULL, no->dir);
     }
     else{
-        *promove = (*no)->info1;
-        maior = criaNo((*no)->info2, (*no)->cen, (*no)->cen);
-        (*no)->info1 = informacao;
-        (*no)->cen = (filho ? *filho : NULL);
+        *promove = no->info1;
+        maior = criaNo(no->info2, no->cen, no->cen);
+        no->info1 = informacao;
+        no->cen = (filho ? *filho : NULL);
     }
-    (*no)->ninfos = 1;
+    no->ninfos = 1;
 
     return maior;
 }
@@ -92,7 +90,7 @@ Arv23PT *inserirArv23(Arv23PT **no, const Info informacao, Info *promove, Arv23P
             if((*no)->ninfos == 1)
                 adicionaChave(*no, informacao, NULL);
             else{
-                maiorNo = quebraNo(no, informacao, promove, NULL);
+                maiorNo = quebraNo(*no, informacao, promove, NULL);
                 if(pai && !(*pai)){
                     *no = criaNo(*promove, *no, maiorNo);
                     maiorNo = NULL;
@@ -116,7 +114,7 @@ Arv23PT *inserirArv23(Arv23PT **no, const Info informacao, Info *promove, Arv23P
                     maiorNo = NULL;
                 }
                 else{
-                    maiorNo = quebraNo(no, *promove, &promove1, &maiorNo);
+                    maiorNo = quebraNo(*no, *promove, &promove1, &maiorNo);
                     if(pai && !(*pai)){
                         *no = criaNo(promove1, *no, maiorNo);
                         maiorNo = NULL;
@@ -148,10 +146,11 @@ void inserirunidade(Unidades **unidades, int unidade){
         inserirunidade(&(*unidades)->prox, unidade);
 }
 
-int insereArvBin(IngPTBST **raiz, const InfoBST *info) {
+int insereArvBin(IngPTBST **raiz, InfoBST *info) {
     int sucesso = 0;
     if((*raiz) == NULL){
         IngPTBST *novo = (IngPTBST *)malloc(sizeof(IngPTBST));
+        novo->info = (InfoBST *)malloc(sizeof(InfoBST));
         novo->info->palavra = (char *)malloc(strlen(info->palavra) + 1);
         strcpy(novo->info->palavra, info->palavra);
         toupperString(novo->info->palavra);
@@ -162,12 +161,13 @@ int insereArvBin(IngPTBST **raiz, const InfoBST *info) {
     } 
     else{
         if(strcmp((*raiz)->info->palavra, info->palavra) == 0)
-            inserirunidade(&(*raiz)->info->unidades, info->unidades);
+            inserirunidade(&(*raiz)->info->unidades, info->unidades->unidade);
         if(strcmp(info->palavra, (*raiz)->info->palavra) < 0)
-            sucesso = insereArvBin(&(*raiz)->esq, info->palavra);
+            sucesso = insereArvBin(&(*raiz)->esq, info);
         else
-            sucesso = insereArvBin(&(*raiz)->dir, info->palavra);
+            sucesso = insereArvBin(&(*raiz)->dir, info);
     }
+    return sucesso;
 }
 
 /*-----------------------------------------------------------------------------------------------------*/
@@ -186,7 +186,7 @@ void exibirEN(const IngPTBST *raiz) {
 int percorreLista(const Unidades *uni, int unidade){
     int enc = 0;
     if(uni != NULL){
-        if(uni == unidade)
+        if(uni->unidade == unidade)
             enc = 0;
         else
             enc = percorreLista(uni->prox, unidade);
@@ -198,7 +198,7 @@ int percorreLista(const Unidades *uni, int unidade){
 void ExibirPalavrasUnidade(Arv23PT *raiz, int unidade){
     if(raiz != NULL){
         ExibirPalavrasUnidade(raiz->esq, unidade);
-        if(percorreLista(raiz->info1.versaoIng->info->palavra, unidade)){
+        if(raiz->info1.versaoIng != NULL && raiz->info1.versaoIng->info != NULL && percorreLista(raiz->info1.versaoIng->info->unidades, unidade)){
             printf("%s: ", raiz->info1.palavra);
             exibirEN(raiz->info1.versaoIng);
             printf("\n");
@@ -207,7 +207,7 @@ void ExibirPalavrasUnidade(Arv23PT *raiz, int unidade){
         ExibirPalavrasUnidade(raiz->cen, unidade);
 
         if(raiz->ninfos == 2){
-            if(percorreLista(raiz->info2.versaoIng->info->unidades, unidade)){
+            if(raiz->info2.versaoIng != NULL && raiz->info2.versaoIng->info != NULL && percorreLista(raiz->info2.versaoIng->info->unidades, unidade)){
                 printf("%s: ", raiz->info2.palavra);
                 exibirEN(raiz->info2.versaoIng);
                 printf("\n");
@@ -248,7 +248,7 @@ void ExibirPalavrasEN(Arv23PT *raiz, char *palavraPTBR){
 das quais ela pertence. Caso ela seja a única palavra em uma das árvores binárias, remover também da
 árvore 2-3 */
 
-int onda(Info saindo, Info *entrada, Arv23PT *pai, Arv23PT **origem, Arv23PT **raiz, Arv23PT **maior, char (*funcao_remover)(Arv23PT **, char, Arv23PT *, Arv23PT **, Arv23PT **)){
+int onda(Info saindo, Info *entrada, Arv23PT *pai, Arv23PT **origem, Arv23PT **raiz, Arv23PT **maior, int (*funcao_remover)(Arv23PT **, char *, Arv23PT *, Arv23PT **, Arv23PT **)){
     int removeu = funcao_remover(raiz, saindo.palavra, pai, origem, maior);
     *entrada = saindo;
     return removeu;
@@ -377,7 +377,7 @@ Arv23PT *buscarMaiorPai(Arv23PT *raiz, char *palavra){
             else
                 pai = buscarMaiorPai(raiz->dir, palavra);
 
-            if(pai == NULL && ((raiz->ninfos == 1 && strcmp(raiz->info1.palavra, palavra) > 0 || (raiz->ninfos == 2 && strcmp(raiz->info2.palavra, palavra) > 0))))
+            if(pai == NULL && ((raiz->ninfos == 1 && strcmp(raiz->info1.palavra, palavra) > 0) || (raiz->ninfos == 2 && strcmp(raiz->info2.palavra, palavra) > 0)))
                 pai = raiz;
         }
     }
@@ -405,7 +405,7 @@ Arv23PT *buscarMaiorPai2Infos(Arv23PT *raiz, char *palavra){
     return pai;
 }
 
-Arv23PT *buscarMenorPai(Arv23PT *raiz, char palavra){
+Arv23PT *buscarMenorPai(Arv23PT *raiz, char *palavra){
     Arv23PT *pai;
     pai = NULL;
 
@@ -467,7 +467,7 @@ int removerNaoFolha1(Arv23PT **origem, Arv23PT *raiz, Info *info, Arv23PT *filho
 
     if(filho->ninfos == 2){
         *info = info_filho;
-        filho->ninfos == 1;
+        filho->ninfos = 1;
     }
     else{
         filho = buscarMenorFilho(filho2, &pai);
@@ -499,7 +499,7 @@ int removerNaoFolha2(Arv23PT **origem, Arv23PT *raiz, Info *info, Arv23PT *filho
     return removeu;
 }
 
-int Remover1Arv23(Arv23PT **raiz, char palavra, Arv23PT *pai, Arv23PT **origem, Arv23PT **maior){
+int Remover1Arv23(Arv23PT **raiz, char *palavra, Arv23PT *pai, Arv23PT **origem, Arv23PT **maior){
     int removeu = 0;
 
     if(*raiz != NULL){
@@ -508,7 +508,7 @@ int Remover1Arv23(Arv23PT **raiz, char palavra, Arv23PT *pai, Arv23PT **origem, 
 
         if(info1 || info2){
             removeu = 1;
-            if(ehFolha(raiz)){
+            if(ehFolha(*raiz)){
                 if((*raiz)->ninfos == 2){
                     if(info1)
                         (*raiz)->info1 = (*raiz)->info2;
@@ -562,7 +562,7 @@ int Remover1Arv23(Arv23PT **raiz, char palavra, Arv23PT *pai, Arv23PT **origem, 
                 removeu = removerNaoFolha1(origem, *raiz, &((*raiz)->info1), (*raiz)->esq, (*raiz)->cen, maior);
         }
         else{
-            if(strcmp(palavra, (*raiz)->info1.palavra))
+            if(strcmp(palavra, (*raiz)->info1.palavra) < 0)
                 removeu = Remover1Arv23(&(*raiz)->esq, palavra, *raiz, origem, maior);
             else if((*raiz)->ninfos == 1 || strcmp(palavra, (*raiz)->info2.palavra) < 0)
                 removeu = Remover1Arv23(&(*raiz)->cen, palavra, *raiz, origem, maior);
@@ -573,7 +573,7 @@ int Remover1Arv23(Arv23PT **raiz, char palavra, Arv23PT *pai, Arv23PT **origem, 
     return removeu;
 }
 
-int Remover2Arv23(Arv23PT **raiz, char palavra, Arv23PT *pai, Arv23PT **origem, Arv23PT **maior){
+int Remover2Arv23(Arv23PT **raiz, char *palavra, Arv23PT *pai, Arv23PT **origem, Arv23PT **maior){
     int removeu = 0;
 
     if(*raiz != NULL){
@@ -582,7 +582,7 @@ int Remover2Arv23(Arv23PT **raiz, char palavra, Arv23PT *pai, Arv23PT **origem, 
 
         if(info1 || info2){
             removeu = 1;
-            if(ehFolha(raiz)){
+            if(ehFolha(*raiz)){
                 if((*raiz)->ninfos == 2){
                     if(info1)
                         (*raiz)->info1 = (*raiz)->info2;
@@ -623,7 +623,7 @@ int Remover2Arv23(Arv23PT **raiz, char palavra, Arv23PT *pai, Arv23PT **origem, 
                                 else
                                     info_pai = paiaux->info1;
 
-                                avo = buscamaior(*origem, info_pai.palavra);
+                                avo = buscarMaiorPai(*origem, info_pai.palavra);
                                 removeu = onda(info_pai, &((*raiz)->info1), avo, origem, &paiaux, maior, Remover2Arv23);
                             }
                         }
@@ -659,10 +659,10 @@ int balanceamento(Arv23PT **raiz, Arv23PT *filho1, Arv23PT **filho2, Info info, 
     return balanceou;
 }
 
-int Arv23Rebalancear(Arv23PT **raiz, char palavra, Arv23PT **maior){
+int Arv23Rebalancear(Arv23PT **raiz, char *palavra, Arv23PT **maior){
     int balanceou = 0;
     if(*raiz != NULL){
-        if(!ehFolha(raiz)){
+        if(!ehFolha(*raiz)){
             if(strcmp(palavra, (*raiz)->info1.palavra) < 0)
                 balanceou = Arv23Rebalancear(&((*raiz)->esq), palavra, maior);
             else if((*raiz)->ninfos == 1 || strcmp(palavra, (*raiz)->info2.palavra) < 0){
@@ -689,7 +689,7 @@ int Arv23Rebalancear(Arv23PT **raiz, char palavra, Arv23PT **maior){
     return balanceou;
 }
 
-int Arv23Remover(Arv23PT **raiz, char palavra){
+int Arv23Remover(Arv23PT **raiz, char *palavra){
     Arv23PT *maior, *posicao;
     int removeu = Remover1Arv23(raiz, palavra, NULL, raiz, &posicao);
 
@@ -698,11 +698,175 @@ int Arv23Remover(Arv23PT **raiz, char palavra){
         maior = NULL;
         removeu = Arv23Rebalancear(raiz, valor.palavra, &maior);
     }
+    return removeu;
 }
 
 /*-----------------------------------------------------------------------------------------------------*/
 
-/* (iv)informar uma palavra em português e a unidade a qual a mesma pertence e então removê-la, para isto
+/* (iv) informar uma palavra em português e a unidade a qual a mesma pertence e então removê-la, para isto
 deve remover a palavra em inglês da árvore binária correspondente a palavra em português da mesma
 unidade. Caso ela seja a única palavra na árvore binária, a palavra em português deve ser removida da
 árvore 2-3 */
+
+int ehFolhaBST(const IngPTBST *raiz){
+    return (raiz->esq == NULL);
+}
+
+IngPTBST *soumFilho(IngPTBST *raiz){
+    IngPTBST *filho = NULL;
+
+    if(raiz->esq == NULL)
+        filho = raiz->dir;
+    else if(raiz->dir == NULL)
+        filho = raiz->esq;
+
+    return filho;
+}
+
+IngPTBST *menorFilhoEsq(IngPTBST *raiz){
+    IngPTBST *filho;
+    filho = NULL;
+
+    if(raiz){
+        filho = menorFilhoEsq(raiz->esq);
+        if(!filho)
+            filho = raiz;
+    }
+
+    return filho;
+}
+
+int removerBST(IngPTBST **raiz, const char *palavra){
+    int removeu = 1;
+    if(*raiz != NULL){
+        if(strcmp(palavra, (*raiz)->info->palavra) == 0){
+            IngPTBST *aux;
+            if(ehFolhaBST(*raiz)){
+                aux = *raiz;
+                free(aux);
+                *raiz = NULL;
+                removeu = 1;
+            }
+            else if((aux = soumFilho(*raiz)) != NULL){
+                IngPTBST *temp;
+                temp = *raiz;
+                free(temp);
+                *raiz = aux;
+                removeu = 1;
+            }
+            else{
+                IngPTBST *menorFilho = menorFilhoEsq((*raiz)->dir);
+                (*raiz)->info = menorFilho->info;
+                removeu = removerBST(&(*raiz)->dir, menorFilho->info->palavra);
+            }
+        }
+        else if(strcmp(palavra, (*raiz)->info->palavra) < 0)
+            removeu = removerBST(&(*raiz)->esq, palavra);
+        else
+            removeu = removerBST(&(*raiz)->dir, palavra);
+    }
+    return removeu;
+}
+
+int buscaBST(IngPTBST *raiz, int unidade){
+    int enc = 0;
+    if(raiz != NULL){
+        buscaBST(raiz->esq, unidade);
+        if(raiz->info->unidades->unidade == unidade && raiz->info->unidades->prox == NULL){
+            // removeu = removerBST(&raiz, raiz->info->palavra);
+            enc = 1;
+        }
+        else{
+            Unidades *aux = raiz->info->unidades->prox;
+
+            while(aux != NULL && !enc){
+                if(aux->unidade == unidade)
+                    enc = 1;
+                else
+                    aux = aux->prox;
+            }
+        }
+        buscaBST(raiz->dir, unidade);
+    }
+    return enc;
+}
+
+void removerPTporUnidade(Arv23PT **raiz, char *palavra, int unidade){
+    int enc = 0;
+    if(*raiz != NULL){
+        if(ehInfo1(**raiz, palavra)){
+            // enc = buscaBST((*raiz)->info1.versaoIng, unidade);
+            // if(enc)
+            //     Arv23Remover(raiz, palavra);
+        }
+        else if(ehInfo2(**raiz, palavra)){
+            enc = buscaBST((*raiz)->info2.versaoIng, unidade);
+            if(enc)
+                Arv23Remover(raiz, palavra);
+        }
+        else{
+            if(strcmp(palavra, (*raiz)->info1.palavra) < 0)
+                removerPTporUnidade(&(*raiz)->esq, palavra, unidade);
+            else if((*raiz)->ninfos == 1 || strcmp(palavra, (*raiz)->info2.palavra) < 0)
+                removerPTporUnidade(&(*raiz)->cen, palavra, unidade);
+            else
+                removerPTporUnidade(&(*raiz)->dir, palavra, unidade);
+        }
+    }
+}
+
+void exibirArv23EmOrdem(Arv23PT *raiz){
+    if(raiz != NULL){
+        exibirArv23EmOrdem(raiz->esq);
+        printf("%s -> ", raiz->info1.palavra);
+        exibirArv23EmOrdem(raiz->cen);
+        if(raiz->ninfos == 2){
+            printf("%s -> ", raiz->info2.palavra);
+            exibirArv23EmOrdem(raiz->dir);
+        }
+    }
+}
+
+int main() {
+    Arv23PT *raiz = NULL, *pai = NULL;
+    Info infos[26];
+    char *palavrasPT[] = {
+        "abacaxi", "banana", "cachorro", "dado", "elefante", "foca", "gato", "hipopotamo", "iguana", "jacare",
+        "kiwi", "leao", "macaco", "navio", "ovelha", "pato", "quati", "rato", "sapo", "tigre",
+        "urso", "vaca", "wolverine", "xaxim", "yak", "zebra"
+    };
+    char *palavrasEN[] = {
+        "pineapple", "banana", "dog", "dice", "elephant", "seal", "cat", "hippopotamus", "iguana", "alligator",
+        "kiwi", "lion", "monkey", "ship", "sheep", "duck", "coati", "rat", "frog", "tiger",
+        "bear", "cow", "wolverine", "fern", "yak", "zebra"
+    };
+
+    for (int i = 0; i < 26; i++) {
+        Info *promove = (Info*)malloc(sizeof(Info));
+        infos[i].palavra = palavrasPT[i];
+        infos[i].versaoIng = (IngPTBST*)malloc(sizeof(IngPTBST));
+        infos[i].versaoIng->info = (InfoBST*)malloc(sizeof(InfoBST));
+        infos[i].versaoIng->info->palavra = palavrasEN[i];
+        infos[i].versaoIng->info->unidades = NULL;
+        infos[i].versaoIng->esq = NULL;
+        infos[i].versaoIng->dir = NULL;
+        inserirArv23(&raiz, infos[i], promove, &pai);
+    }
+
+    exibirArv23EmOrdem(raiz);
+
+    printf("\n\n");
+
+    // int removeu = 0;
+
+    for (int i = 0; i < 26; i++) {
+        printf("Removendo %s\n", palavrasPT[i]);
+        Arv23Remover(&raiz, palavrasPT[i]);
+        printf("\n\n");
+        exibirArv23EmOrdem(raiz);
+        printf("\n\n");
+    }
+
+    desalocarArv23(&raiz);
+    return 0;
+}
