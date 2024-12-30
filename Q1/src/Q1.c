@@ -18,7 +18,9 @@ void toupperString(char *string) {
     }
 }
 
-Arv23PT *criaNo(const Info informacao, Arv23PT *filhoesq, Arv23PT *filhocen){
+// OK
+
+Arv23PT *criaNo(Info informacao, Arv23PT *filhoesq, Arv23PT *filhocen){
     Arv23PT *no = (Arv23PT*)malloc(sizeof(Arv23PT));
 
     if(!no){
@@ -28,12 +30,15 @@ Arv23PT *criaNo(const Info informacao, Arv23PT *filhoesq, Arv23PT *filhocen){
     no->info1 = informacao;
     no->esq = filhoesq;
     no->cen = filhocen;
+    no->dir = NULL;
     no->ninfos = 1;
 
     return no;
 }
 
-void adicionaChave(Arv23PT *no, const Info informacao, Arv23PT *filho){
+// OK
+
+void adicionaChave(Arv23PT *no, Info informacao, Arv23PT *filho){
     if(strcmp(informacao.palavra, no->info1.palavra) > 0){
         no->info2 = informacao;
         no->dir = filho;
@@ -47,28 +52,24 @@ void adicionaChave(Arv23PT *no, const Info informacao, Arv23PT *filho){
     no->ninfos = 2;
 }
 
-Arv23PT *quebraNo(Arv23PT *no, const Info informacao, Info *promove, Arv23PT **filho){
+// OK
+
+Arv23PT *quebraNo(Arv23PT *no, Info informacao, Info *promove, Arv23PT *filho){
     Arv23PT *maior;
 
     if(strcmp(informacao.palavra, no->info2.palavra) > 0){
         *promove = no->info2;
-        if(filho)
-            maior = criaNo(informacao, no->dir, *filho);
-        else
-            maior = criaNo(informacao, no->dir,  NULL);
+        maior = criaNo(informacao, no->dir, filho);
     }
     else if(strcmp(informacao.palavra, no->info1.palavra) > 0){
         *promove = informacao;
-        if(filho)
-            maior = criaNo(no->info2, *filho, no->dir);
-        else
-            maior = criaNo(no->info2, NULL, no->dir);
+        maior = criaNo(no->info2, filho, no->dir);
     }
     else{
         *promove = no->info1;
-        maior = criaNo(no->info2, no->cen, no->cen);
+        maior = criaNo(no->info2, filho, no->dir);
         no->info1 = informacao;
-        no->cen = (filho ? *filho : NULL);
+        no->cen = filho;
     }
     no->ninfos = 1;
 
@@ -79,8 +80,7 @@ int ehFolha(Arv23PT no){
     return (no.esq == NULL);
 }
 
-Arv23PT *inserirArv23(Arv23PT **no, const Info informacao, Info *promove, Arv23PT **pai){
-    Info promove1;
+Arv23PT *inserirArv23(Arv23PT **no, Info informacao, Arv23PT *pai, Info *promove){
     Arv23PT *maiorNo = NULL;
 
     if(*no == NULL)
@@ -91,32 +91,31 @@ Arv23PT *inserirArv23(Arv23PT **no, const Info informacao, Info *promove, Arv23P
                 adicionaChave(*no, informacao, NULL);
             else{
                 maiorNo = quebraNo(*no, informacao, promove, NULL);
-                if(pai && !(*pai)){
+                if(pai == NULL){
                     *no = criaNo(*promove, *no, maiorNo);
                     maiorNo = NULL;
                 }
             }
         }
         else{
-            if(strcmp(informacao.palavra, (*no)->info1.palavra) < 0){
-                maiorNo = inserirArv23(&((*no)->esq), informacao, promove, no);
-            }
-            else if(((*no)->ninfos == 1) || (strcmp(informacao.palavra, (*no)->info2.palavra) < 0)){
-                maiorNo = inserirArv23(&((*no)->cen), informacao, promove, no);
-            }
-            else{
-                maiorNo = inserirArv23(&((*no)->dir), informacao, promove, no);
-            }
+            if(strcmp(informacao.palavra, (*no)->info1.palavra) < 0)
+                maiorNo = inserirArv23(&((*no)->esq), informacao, *no, promove);
+            else if((*no)->ninfos == 1 || strcmp(informacao.palavra, (*no)->info2.palavra) < 0)
+                maiorNo = inserirArv23(&((*no)->cen), informacao, *no, promove);
+            else
+                maiorNo = inserirArv23(&((*no)->dir), informacao, *no, promove);
 
-            if(maiorNo){
+            if(maiorNo != NULL){
                 if((*no)->ninfos == 1){
                     adicionaChave(*no, *promove, maiorNo);
                     maiorNo = NULL;
                 }
                 else{
-                    maiorNo = quebraNo(*no, *promove, &promove1, &maiorNo);
-                    if(pai && !(*pai)){
-                        *no = criaNo(promove1, *no, maiorNo);
+                    Info promove_aux;
+                    maiorNo = quebraNo(*no, *promove, &promove_aux, maiorNo);
+                    *promove = promove_aux;
+                    if(pai == NULL){
+                        *no = criaNo(promove_aux, *no, maiorNo);
                         maiorNo = NULL;
                     }
                 }
@@ -914,7 +913,7 @@ int main() {
         infos[i].versaoIng->info->unidades = NULL;
         infos[i].versaoIng->esq = NULL;
         infos[i].versaoIng->dir = NULL;
-        inserirArv23(&raiz, infos[i], promove, &pai);
+        inserirArv23(&raiz, infos[i], pai, promove);
     }
 
     exibirArv23EmOrdem(raiz);
@@ -923,7 +922,7 @@ int main() {
 
     // int removeu = 0;
 
-    for (int i = 0; i < 26; i++) {
+    for (int i = 25; i >= 0; i--) {
         printf("Removendo %s\n", palavrasPT[i]);
         // if(strcmp(palavrasPT[i], "vaca") == 0)
         //     printf("Vaca");

@@ -37,11 +37,11 @@ typedef struct Arv23pt{
 /* FUNÇÕES ADICIONAIS */
 
 void toupperString(char *string);
-Arv23PT *criaNo(const Info informacao, Arv23PT *filhoesq, Arv23PT *filhocen);
-void adicionaChave(Arv23PT *no, const Info informacao, Arv23PT *filho);
-Arv23PT *quebraNo(Arv23PT *no, const Info informacao, Info *promove, Arv23PT **filho);
+Arv23PT *criaNo(Info informacao, Arv23PT *filhoesq, Arv23PT *filhocen);
+void adicionaChave(Arv23PT *no, Info informacao, Arv23PT *filho);
+Arv23PT *quebraNo(Arv23PT *no, Info informacao, Info *promove, Arv23PT *filho);
 int ehFolha(Arv23PT no);
-Arv23PT *inserirArv23(Arv23PT **no, const Info informacao, Info *promove, Arv23PT **pai);
+Arv23PT *inserirArv23(Arv23PT **no, Info informacao, Arv23PT *pai, Info *promove);
 void freeTree(Arv23PT *no);
 void inserirunidade(Unidades **unidades, int unidade);
 int insereArvBin(IngPTBST **raiz, InfoBST *info);
