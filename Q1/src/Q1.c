@@ -18,7 +18,6 @@ void toupperString(char *string) {
     }
 }
 
-// OK
 
 Arv23PT *criaNo(Info informacao, Arv23PT *filhoesq, Arv23PT *filhocen){
     Arv23PT *no = (Arv23PT*)malloc(sizeof(Arv23PT));
@@ -36,7 +35,6 @@ Arv23PT *criaNo(Info informacao, Arv23PT *filhoesq, Arv23PT *filhocen){
     return no;
 }
 
-// OK
 
 void adicionaChave(Arv23PT *no, Info informacao, Arv23PT *filho){
     if(strcmp(informacao.palavra, no->info1.palavra) > 0){
@@ -52,7 +50,6 @@ void adicionaChave(Arv23PT *no, Info informacao, Arv23PT *filho){
     no->ninfos = 2;
 }
 
-// OK
 
 Arv23PT *quebraNo(Arv23PT *no, Info informacao, Info *promove, Arv23PT *filho){
     Arv23PT *maior;
@@ -247,15 +244,18 @@ void ExibirPalavrasEN(Arv23PT *raiz, char *palavraPTBR){
 das quais ela pertence. Caso ela seja a única palavra em uma das árvores binárias, remover também da
 árvore 2-3 */
 
-// OK
-
 int onda(Info saindo, Info *entrada, Arv23PT *pai, Arv23PT **origem, Arv23PT **raiz, Arv23PT **maior, int (*funcao_remover)(Arv23PT **, char *, Arv23PT *, Arv23PT **, Arv23PT **)){
     int removeu = funcao_remover(raiz, saindo.palavra, pai, origem, maior);
     *entrada = saindo;
     return removeu;
 }
 
-// OK
+int altura(Arv23PT *no){
+    int alt = -1;
+    if(no != NULL)
+        alt = 1 + altura(no->esq);
+    return alt;
+}
 
 int removivel(Arv23PT *raiz) {
     int pode = 0;
@@ -271,8 +271,6 @@ int removivel(Arv23PT *raiz) {
     return pode;
 }
 
-// OK
-
 Arv23PT *buscarMenorFilho(Arv23PT *raiz, Arv23PT **pai){
     Arv23PT *filho;
     filho = raiz;
@@ -284,13 +282,9 @@ Arv23PT *buscarMenorFilho(Arv23PT *raiz, Arv23PT **pai){
     return filho;
 }
 
-// OK
-
 Info maiorFilho(Arv23PT *raiz){
     return raiz->ninfos == 2 ? raiz->info2 : raiz->info1;
 }
-
-// OK
 
 Arv23PT *buscarMaiorFilho(Arv23PT *raiz, Arv23PT **pai, Info *maiorValor){
     Arv23PT *filho;
@@ -310,14 +304,10 @@ Arv23PT *buscarMaiorFilho(Arv23PT *raiz, Arv23PT **pai, Info *maiorValor){
     return filho;
 }
 
-// OK
-
 void desalocaNo(Arv23PT **no) {
     free(*no);
     *no = NULL;
 }
-
-// OK
 
 void adicionarInfo(Arv23PT *no, Info info, Arv23PT *filhomaior){
     if(strcmp(info.palavra, no->info1.palavra) > 0){
@@ -333,8 +323,6 @@ void adicionarInfo(Arv23PT *no, Info info, Arv23PT *filhomaior){
     no->ninfos = 2;
 }
 
-// OK
-
 Arv23PT *juntaNo(Arv23PT *filho1, Info info, Arv23PT *maior, Arv23PT **raiz){
     adicionarInfo(filho1, info, maior);
 
@@ -346,19 +334,13 @@ Arv23PT *juntaNo(Arv23PT *filho1, Info info, Arv23PT *maior, Arv23PT **raiz){
     return filho1;
 }
 
-// OK
-
 int ehInfo1(const Arv23PT no, const char *palavra){
     return strcmp(no.info1.palavra, palavra) == 0;
 }
 
-// OK
-
 int ehInfo2(const Arv23PT no, const char *palavra){
     return no.ninfos == 2 && strcmp(no.info2.palavra, palavra) == 0;
 }
-
-// OK
 
 Arv23PT *buscapai(Arv23PT *raiz, char *palavra) {
     Arv23PT *pai;
@@ -380,7 +362,6 @@ Arv23PT *buscapai(Arv23PT *raiz, char *palavra) {
     return pai;
 }
 
-// OK
 
 Arv23PT *buscarMaiorPai(Arv23PT *raiz, char *palavra){
     Arv23PT *pai;
@@ -403,28 +384,6 @@ Arv23PT *buscarMaiorPai(Arv23PT *raiz, char *palavra){
     return pai;
 }
 
-// Arv23PT *buscarMaiorPai2Infos(Arv23PT *raiz, char *palavra){
-//     Arv23PT *pai;
-//     pai = NULL;
-
-//     if(raiz != NULL){
-//         if(!ehInfo1(*raiz, palavra) && !ehInfo2(*raiz, palavra)){
-//             if(strcmp(palavra, raiz->info1.palavra))
-//                 pai = buscarMaiorPai2Infos(raiz->esq, palavra);
-//             else if(raiz->ninfos == 1 || strcmp(palavra, raiz->info2.palavra) < 0)
-//                 pai = buscarMaiorPai2Infos(raiz->cen, palavra);
-//             else
-//                 pai = buscarMaiorPai2Infos(raiz->dir, palavra);
-
-//             if(pai == NULL && raiz->ninfos == 2 && strcmp(raiz->info1.palavra, palavra) > 0)
-//                 pai = raiz;
-//         }
-//     }
-//     return pai;
-// }
-
-// OK
-
 Arv23PT *buscarMenorPai(Arv23PT *raiz, char *palavra){
     Arv23PT *pai;
     pai = NULL;
@@ -445,7 +404,6 @@ Arv23PT *buscarMenorPai(Arv23PT *raiz, char *palavra){
     return pai;
 }
 
-// OK
 
 Arv23PT *buscarMenorPai2Infos(Arv23PT *raiz, char *palavra){
     Arv23PT *pai;
@@ -467,7 +425,6 @@ Arv23PT *buscarMenorPai2Infos(Arv23PT *raiz, char *palavra){
     return pai;
 }
 
-// OK
 
 void desalocarArv23(Arv23PT **raiz){
     if(*raiz != NULL){
@@ -481,7 +438,6 @@ void desalocarArv23(Arv23PT **raiz){
     }
 }
 
-// OK
 
 int removerNaoFolha1(Arv23PT **origem, Arv23PT *raiz, Info *info, Arv23PT *filho1, Arv23PT *filho2, Arv23PT **maior){
     int removeu;
@@ -502,8 +458,6 @@ int removerNaoFolha1(Arv23PT **origem, Arv23PT *raiz, Info *info, Arv23PT *filho
 
     return removeu;
 }
-
-// OK
 
 int removerNaoFolha2(Arv23PT **origem, Arv23PT *raiz, Info *info, Arv23PT *filho1, Arv23PT *filho2, Arv23PT **maior){
     int removeu;
@@ -526,8 +480,6 @@ int removerNaoFolha2(Arv23PT **origem, Arv23PT *raiz, Info *info, Arv23PT *filho
 
     return removeu;
 }
-
-// OK
 
 int Remover1Arv23(Arv23PT **raiz, char *palavra, Arv23PT *pai, Arv23PT **origem, Arv23PT **maior){
     int removeu = 0;
@@ -567,17 +519,22 @@ int Remover1Arv23(Arv23PT **raiz, char *palavra, Arv23PT *pai, Arv23PT **origem,
                             Arv23PT *menorpai;
                             menorpai = buscarMenorPai2Infos(*origem, (*raiz)->info1.palavra);
 
-                            if(paiaux == NULL || (paiaux != pai && menorpai != NULL)){
+                            if(paiaux != NULL){
+                                if(strcmp(paiaux->info1.palavra, (*raiz)->info1.palavra) > 0)
+                                    info_pai = paiaux->info1;
+                                else
+                                    info_pai = paiaux->info2;
+                            }
+
+                            int alturaMenorPai = altura(menorpai);
+                            int alturaPaiAux = altura(paiaux);
+
+                            if(paiaux == NULL || (paiaux != pai && menorpai != NULL && alturaMenorPai <= alturaPaiAux && strcmp(info_pai.palavra, menorpai->info2.palavra) > 0)){
                                 *maior = pai;
                                 (*raiz)->ninfos = 0;
                                 removeu = -1;
                             }
                             else{
-                                if(strcmp(paiaux->info1.palavra, (*raiz)->info1.palavra) > 0)
-                                    info_pai = paiaux->info1;
-                                else
-                                    info_pai = paiaux->info2;
-
                                 Arv23PT *avo;
                                 avo = buscapai(*origem, info_pai.palavra);
                                 removeu = onda(info_pai, &((*raiz)->info1), avo, origem, &paiaux, maior, Remover1Arv23);
@@ -603,7 +560,6 @@ int Remover1Arv23(Arv23PT **raiz, char *palavra, Arv23PT *pai, Arv23PT **origem,
     return removeu;
 }
 
-// OK
 
 int Remover2Arv23(Arv23PT **raiz, char *palavra, Arv23PT *pai, Arv23PT **origem, Arv23PT **maior){
     int removeu = 0;
@@ -679,7 +635,6 @@ int Remover2Arv23(Arv23PT **raiz, char *palavra, Arv23PT *pai, Arv23PT **origem,
     return removeu;
 }
 
-// OK
 
 int balanceamento(Arv23PT **raiz, Arv23PT *filho1, Arv23PT **filho2, Info info, Arv23PT **maior){
     int balanceou = 0;
@@ -693,7 +648,6 @@ int balanceamento(Arv23PT **raiz, Arv23PT *filho1, Arv23PT **filho2, Info info, 
     return balanceou;
 }
 
-// OK
 
 int Arv23Rebalancear(Arv23PT **raiz, char *palavra, Arv23PT **maior){
     int balanceou = 0;
@@ -725,7 +679,6 @@ int Arv23Rebalancear(Arv23PT **raiz, char *palavra, Arv23PT **maior){
     return balanceou;
 }
 
-// OK
 
 int Arv23Remover(Arv23PT **raiz, char *palavra){
     Arv23PT *maior, *posicao;
@@ -893,6 +846,7 @@ void exibirArv23EmOrdem(Arv23PT *raiz){
 int main() {
     Arv23PT *raiz = NULL, *pai = NULL;
     Info infos[26];
+    int i;
     char *palavrasPT[] = {
         "abacaxi", "banana", "cachorro", "dado", "elefante", "foca", "gato", "hipopotamo", "iguana", "jacare",
         "kiwi", "leao", "macaco", "navio", "ovelha", "pato", "quati", "rato", "sapo", "tigre",
@@ -904,7 +858,7 @@ int main() {
         "bear", "cow", "wolverine", "fern", "yak", "zebra"
     };
 
-    for (int i = 0; i < 26; i++) {
+    for(i = 0; i < 26; i++){
         Info *promove = (Info*)malloc(sizeof(Info));
         infos[i].palavra = palavrasPT[i];
         infos[i].versaoIng = (IngPTBST*)malloc(sizeof(IngPTBST));
@@ -920,12 +874,8 @@ int main() {
 
     printf("\n\n");
 
-    // int removeu = 0;
-
-    for (int i = 25; i >= 0; i--) {
+    for(i = 0; i < 26; i++){
         printf("Removendo %s\n", palavrasPT[i]);
-        // if(strcmp(palavrasPT[i], "vaca") == 0)
-        //     printf("Vaca");
         Arv23Remover(&raiz, palavrasPT[i]);
         printf("\n\n");
         exibirArv23EmOrdem(raiz);
