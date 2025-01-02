@@ -83,6 +83,7 @@ int Remover2Arv23(Arv23PT **raiz, char *palavra, Arv23PT *pai, Arv23PT **origem,
 int balanceamento(Arv23PT **raiz, Arv23PT *filho1, Arv23PT **filho2, Info info, Arv23PT **maior);
 int Arv23Rebalancear(Arv23PT **raiz, char *palavra, Arv23PT **maior);
 int Arv23Remover(Arv23PT **raiz, char *palavra);
+int removerMain(Arv23PT **raiz, char *palavraIN, int unidade, Arv23PT *ref);
 
 /*
     Funções Referente ao Item IV
@@ -91,7 +92,6 @@ int ehFolhaBST(const IngPTBST *raiz);
 IngPTBST *soumFilho(IngPTBST *raiz);
 IngPTBST *menorFilhoEsq(IngPTBST *raiz);
 int removerBST(IngPTBST **raiz, const char *palavra);
-int buscaBST(IngPTBST *raiz, int unidade);
-void removerPTporUnidade(Arv23PT **raiz, char *palavra, int unidade);
+int removerPTporUnidade(Arv23PT **raiz, char *palavra, int unidade, Arv23PT *ref);
 
 #endif

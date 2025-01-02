@@ -6,11 +6,11 @@
 #include "./src/Q1.h"
 
 void menugeral(){
-    #ifdef _WIN32
-        system("cls");
-    #else
-        system("clear");
-    #endif
+    // #ifdef _WIN32
+    //     system("cls");
+    // #else
+    //     system("clear");
+    // #endif
     printf("                                          \n");
     printf("            M E N U   G E R A L           \n");
     printf("                                          \n");
@@ -19,16 +19,17 @@ void menugeral(){
     printf(" Item III. Remover palavra em inglês      \n");
     printf(" Item IV. Remover palavra em português    \n");
     printf(" Item V. Metrificar busca                 \n");
+    printf(" Item VI. Visualizar 2-3                  \n");
     printf(" 0. Sair do programa                      \n");
     printf("\n");
 }
 
 void menuprincipal(){
-    #ifdef _WIN32
-        system("cls");
-    #else
-        system("clear");
-    #endif
+    // #ifdef _WIN32
+    //     system("cls");
+    // #else
+    //     system("clear");
+    // #endif
     printf("                                         \n");
     printf("       M E N U   P R I N C I P A L       \n");
     printf("                                         \n");
@@ -195,15 +196,15 @@ int main(){
             }
         }
         // Exibir a Árvore 2-3 em ordem
-        // exibirArv23EmOrdem(raiz);
+        exibirArv23EmOrdem(raiz);
         fclose(arquivo);
-        int opc = -1, opc2 = -1, unidade = 0;
+        int opc = -1, opc2 = -1, unidade = 0, enc = 0;
         char palavra[50];
-        #ifdef _WIN32
-            system("PAUSE");
-        #else
-            system("read -p 'Pressione Enter para continuar...' var");
-        #endif
+        // #ifdef _WIN32
+        //     system("PAUSE");
+        // #else
+        //     system("read -p 'Pressione Enter para continuar...' var");
+        // #endif
         while(opc != 2){
             menuprincipal();
             printf("Digite a opção desejada: ");
@@ -228,16 +229,26 @@ int main(){
                             case 3:
                                 printf("Digite a palavra em inglês: ");
                                 scanf("%s", palavra);
-                                // removerBST(raiz, palavra);
+                                printf("Digite a unidade: ");
+                                scanf("%d", &unidade);
+                                enc = removerMain(&raiz, palavra, unidade, raiz);
+                                enc ? printf("Palavra removida com sucesso!\n") : printf("Palavra não encontrada!\n");
                                 break;
                             case 4:
                                 printf("Digite a palavra em português: ");
                                 scanf("%s", palavra);
-                                removerPTporUnidade(&raiz, palavra, unidade);
+                                printf("Digite a unidade: ");
+                                scanf("%d", &unidade);
+                                enc = removerPTporUnidade(&raiz, palavra, unidade, raiz);
+                                enc ? printf("Palavra removida com sucesso!\n") : printf("Palavra não encontrada!\n");
                                 break;
                             case 5:
                                 for(int i = 0; i < 30; i++)
                                     metrificarbusca();
+                                break;
+                            case 6:
+                                printf("\n\n");
+                                exibirArv23EmOrdem(raiz);
                                 break;
                             case 0:
                                 printf("Saindo do menu geral...\n");
@@ -247,11 +258,11 @@ int main(){
                                 printf("Opção inválida\n");
                                 break;
                         }
-                        #ifdef _WIN32
-                            system("PAUSE");
-                        #else
-                            system("read -p 'Pressione Enter para continuar...' var");
-                        #endif
+                        // #ifdef _WIN32
+                        //     system("PAUSE");
+                        // #else
+                        //     system("read -p 'Pressione Enter para continuar...' var");
+                        // #endif
                     }while(opc2 != 0);
                     break;
                 case 2:
@@ -266,46 +277,3 @@ int main(){
     }
     return 0;
 }
-
-// int main1(){
-//     Arv23PT *raiz = NULL, *pai = NULL;
-//     Info infos[26];
-//     int i;
-//     char *palavrasPT[] = {
-//         "abacaxi", "banana", "cachorro", "dado", "elefante", "foca", "gato", "hipopotamo", "iguana", "jacare",
-//         "kiwi", "leao", "macaco", "navio", "ovelha", "pato", "quati", "rato", "sapo", "tigre",
-//         "urso", "vaca", "wolverine", "xaxim", "yak", "zebra"
-//     };
-//     char *palavrasEN[] = {
-//         "pineapple", "banana", "dog", "dice", "elephant", "seal", "cat", "hippopotamus", "iguana", "alligator",
-//         "kiwi", "lion", "monkey", "ship", "sheep", "duck", "coati", "rat", "frog", "tiger",
-//         "bear", "cow", "wolverine", "fern", "yak", "zebra"
-//     };
-
-//     for(i = 0; i < 26; i++){
-//         Info *promove = (Info*)malloc(sizeof(Info));
-//         infos[i].palavra = palavrasPT[i];
-//         infos[i].versaoIng = (IngPTBST*)malloc(sizeof(IngPTBST));
-//         infos[i].versaoIng->info = (InfoBST*)malloc(sizeof(InfoBST));
-//         infos[i].versaoIng->info->palavra = palavrasEN[i];
-//         infos[i].versaoIng->info->unidades = NULL;
-//         infos[i].versaoIng->esq = NULL;
-//         infos[i].versaoIng->dir = NULL;
-//         inserirArv23(&raiz, infos[i], pai, promove);
-//     }
-
-//     exibirArv23EmOrdem(raiz);
-
-//     printf("\n\n");
-
-//     for(i = 0; i < 26; i++){
-//         printf("Removendo %s\n", palavrasPT[i]);
-//         Arv23Remover(&raiz, palavrasPT[i]);
-//         printf("\n\n");
-//         exibirArv23EmOrdem(raiz);
-//         printf("\n\n");
-//     }
-
-//     desalocarArv23(&raiz);
-//     return 0;
-// }
