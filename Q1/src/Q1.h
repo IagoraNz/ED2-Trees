@@ -50,8 +50,7 @@ int insereArvBin(IngPTBST **raiz, InfoBST *info);
     Funções Referente ao Item I
 */
 void exibirEN(const IngPTBST *raiz);
-int percorreLista(const Unidades *uni, int unidade);
-void ExibirPalavrasUnidade(Arv23PT *raiz, int unidade);
+int ExibirPalavrasUnidade(Arv23PT *raiz, int unidade);
 
 /*
     Funções Referente ao Item II
@@ -62,6 +61,7 @@ void ExibirPalavrasEN(Arv23PT *raiz, char *palavraPTBR);
     Funções Referente ao Item III
 */
 int onda(Info saindo, Info *entrada, Arv23PT *pai, Arv23PT **origem, Arv23PT **raiz, Arv23PT **maior, int (*funcao_remover)(Arv23PT **, char *, Arv23PT *, Arv23PT **, Arv23PT **));
+int calcAltura(Arv23PT *no);
 int removivel(Arv23PT *raiz);
 Arv23PT *buscarMenorFilho(Arv23PT *raiz, Arv23PT **pai);
 Info maiorFilho(Arv23PT *raiz);
@@ -69,11 +69,10 @@ Arv23PT *buscarMaiorFilho(Arv23PT *raiz, Arv23PT **pai, Info *maiorValor);
 void desalocaNo(Arv23PT **no);
 void adicionarInfo(Arv23PT *no, Info info, Arv23PT *filhomaior);
 Arv23PT *juntaNo(Arv23PT *filho1, Info info, Arv23PT *maior, Arv23PT **raiz);
-int ehInfo1(const Arv23PT no, const char *palavra);
-int ehInfo2(const Arv23PT no, const char *palavra);
+int ehInfo1(Arv23PT no, char *palavra);
+int ehInfo2(Arv23PT no, char *palavra);
 Arv23PT *buscapai(Arv23PT *raiz, char *palavra);
 Arv23PT *buscarMaiorPai(Arv23PT *raiz, char *palavra);
-// Arv23PT *buscarMaiorPai2Infos(Arv23PT *raiz, char *palavra);
 Arv23PT *buscarMenorPai(Arv23PT *raiz, char *palavra);
 Arv23PT *buscarMenorPai2Infos(Arv23PT *raiz, char *palavra);
 void desalocarArv23(Arv23PT **raiz);

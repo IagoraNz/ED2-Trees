@@ -1,0 +1,6 @@
+% Unidade 1
+Bus: onibus, barramento;
+Bug: inseto, problema;
+% Unidade 2
+Bicycle: bicicleta;
+Bug: inseto;
