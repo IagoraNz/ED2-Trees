@@ -92,7 +92,6 @@ int ehFolhaBST(const IngPTBST *raiz);
 IngPTBST *soumFilho(IngPTBST *raiz);
 IngPTBST *menorFilhoEsq(IngPTBST *raiz);
 int removerBST(IngPTBST **raiz, const char *palavra);
-int buscaBST(IngPTBST *raiz, int unidade);
-void removerPTporUnidade(Arv23PT **raiz, char *palavra, int unidade);
+int removerPTporUnidade(Arv23PT **raiz, char *palavra, int unidade, Arv23PT *ref);
 
 #endif

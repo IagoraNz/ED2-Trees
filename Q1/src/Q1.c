@@ -1017,29 +1017,37 @@ int Arv23Remover(Arv23PT **raiz, char *palavra){
  * @return void
  */
 int removerPalavraListaEnc(Unidades **uni, int unidade){
-    int removeu = 1;
+    int removeu = 0;
     if((*uni) != NULL){
         if((*uni)->unidade == unidade){
+            removeu = 1;
             Unidades *aux = *uni;
             *uni = aux->prox;
             free(aux);
-            removeu = 1;
         }
         else
-            removerPalavraListaEnc(&(*uni)->prox, unidade);
+            removeu |= removerPalavraListaEnc(&(*uni)->prox, unidade);
     }
     return removeu;
 }
 
+/**
+ * @brief Função que percorre uma árvore binária de busca e remove uma unidade de uma palavra
+ * 
+ * @param raiz: raiz da árvore binária de busca
+ * @param unidade: unidade a ser removida
+ * @param palavraIN: palavra a ser removida
+ * @return int: 1 se a remoção foi bem sucedida, 0 caso contrário
+ */
 int percorrerBST(IngPTBST **raiz, int unidade, char *palavraIN){
     int enc = 0;
     if((*raiz) != NULL){
-        enc = percorrerBST(&(*raiz)->esq, unidade, palavraIN);
-        enc = percorrerBST(&(*raiz)->dir, unidade, palavraIN);
+        enc |= percorrerBST(&(*raiz)->esq, unidade, palavraIN);
+        enc |= percorrerBST(&(*raiz)->dir, unidade, palavraIN);
         if(strcmp((*raiz)->info->palavra, palavraIN) == 0)
-            enc = removerPalavraListaEnc(&(*raiz)->info->unidades, unidade);
+            enc |= removerPalavraListaEnc(&(*raiz)->info->unidades, unidade);
         if(enc && (*raiz)->info->unidades == NULL)
-            removerBST(raiz, (*raiz)->info->palavra);
+            enc |= removerBST(raiz, (*raiz)->info->palavra);
     }
     return enc;
 }
@@ -1054,22 +1062,21 @@ int percorrerBST(IngPTBST **raiz, int unidade, char *palavraIN){
  * @return int: 1 se a remoção foi bem sucedida, 0 caso contrário
  */
 int removerMain(Arv23PT **raiz, char *palavraIN, int unidade, Arv23PT *ref){
-    int enc = 0;
+    int enc = 1;
     if(ref != NULL){
-        enc = removerMain(raiz, palavraIN, unidade, ref->esq);
+        enc |= percorrerBST(&ref->info1.versaoIng, unidade, palavraIN);
+        if((ref)->info1.versaoIng == NULL)
+            enc |= Arv23Remover(raiz, ref->info1.palavra);
 
-        enc = percorrerBST(&ref->info1.versaoIng, unidade, palavraIN);
-        if((*raiz)->info1.versaoIng == NULL)
-            Arv23Remover(raiz, ref->info1.palavra);
-
-        enc = removerMain(raiz, palavraIN, unidade, ref->cen);
-
-        if((*raiz)->ninfos == 2){
-            enc = percorrerBST(&ref->info2.versaoIng, unidade, palavraIN);
-            if((*raiz)->info2.versaoIng == NULL)
-                Arv23Remover(raiz, ref->info2.palavra);
-            enc = removerMain(raiz, palavraIN, unidade, ref->dir);
+        if (ref->ninfos == 2){
+            enc |= removerMain(raiz, palavraIN, unidade, ref->dir);
+            enc |= percorrerBST(&ref->info2.versaoIng, unidade, palavraIN);
+            if((ref)->info2.versaoIng == NULL)
+                enc |= Arv23Remover(raiz, ref->info2.palavra);
         }
+
+        enc |= removerMain(raiz, palavraIN, unidade, ref->esq);
+        enc |= removerMain(raiz, palavraIN, unidade, ref->cen);
     }
     return enc;
 }
@@ -1081,10 +1088,22 @@ deve remover a palavra em inglês da árvore binária correspondente a palavra e
 unidade. Caso ela seja a única palavra na árvore binária, a palavra em português deve ser removida da
 árvore 2-3 */
 
+/**
+ * @brief Função que verifica se um nó é folha da árvore binária de busca
+ * 
+ * @param raiz: raiz da árvore binária de busca
+ * @return int: 1 se o nó é folha, 0 caso contrário
+ */
 int ehFolhaBST(const IngPTBST *raiz){
     return (raiz->esq == NULL);
 }
 
+/**
+ * @brief Função que verifica se um nó possui apenas um filho
+ * 
+ * @param raiz: raiz da árvore binária de busca
+ * @return int: 1 se o nó é removível, 0 caso contrário
+ */
 IngPTBST *soumFilho(IngPTBST *raiz){
     IngPTBST *filho = NULL;
 
@@ -1096,6 +1115,12 @@ IngPTBST *soumFilho(IngPTBST *raiz){
     return filho;
 }
 
+/**
+ * @brief Função que busca o menor filho à esquerda de um nó
+ * 
+ * @param raiz: raiz da árvore binária de busca
+ * @return IngPTBST*: menor filho
+ */
 IngPTBST *menorFilhoEsq(IngPTBST *raiz){
     IngPTBST *filho;
     filho = NULL;
@@ -1109,6 +1134,13 @@ IngPTBST *menorFilhoEsq(IngPTBST *raiz){
     return filho;
 }
 
+/**
+ * @brief Função que remove uma palavra de uma árvore binária de busca
+ * 
+ * @param raiz: raiz da árvore binária de busca
+ * @param palavra: palavra a ser removida
+ * @return int: 1 se a remoção foi bem sucedida, 0 caso contrário
+ */
 int removerBST(IngPTBST **raiz, const char *palavra){
     int removeu = 1;
     if(*raiz != NULL){
@@ -1141,49 +1173,51 @@ int removerBST(IngPTBST **raiz, const char *palavra){
     return removeu;
 }
 
-int buscaBST(IngPTBST *raiz, int unidade){
+/**
+ * @brief Função que percorre uma árvore binária de busca e remove uma unidade de uma palavra
+ * 
+ * @param raiz: raiz da árvore binária de busca
+ * @param unidade: unidade a ser removida
+ * @return int: 1 se a remoção foi bem sucedida, 0 caso contrário
+ */
+int percorrerBSTporUnidade(IngPTBST **raiz, int unidade){
     int enc = 0;
-    if(raiz != NULL){
-        buscaBST(raiz->esq, unidade);
-        if(raiz->info->unidades->unidade == unidade && raiz->info->unidades->prox == NULL){
-            // removeu = removerBST(&raiz, raiz->info->palavra);
-            enc = 1;
-        }
-        else{
-            Unidades *aux = raiz->info->unidades->prox;
-
-            while(aux != NULL && !enc){
-                if(aux->unidade == unidade)
-                    enc = 1;
-                else
-                    aux = aux->prox;
-            }
-        }
-        buscaBST(raiz->dir, unidade);
+    if(*raiz != NULL){
+        enc |= percorrerBSTporUnidade(&(*raiz)->esq, unidade);
+        enc |= removerPalavraListaEnc(&(*raiz)->info->unidades, unidade);
+        enc |= percorrerBSTporUnidade(&(*raiz)->dir, unidade);
     }
     return enc;
 }
 
-void removerPTporUnidade(Arv23PT **raiz, char *palavra, int unidade){
+/**
+ * @brief Função que remove uma palavra de uma árvore 2-3
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @param palavra: palavra a ser removida
+ * @param unidade: unidade da palavra
+ * @param ref: nó de referência
+ * @return int: 1 se a remoção foi bem sucedida, 0 caso contrário
+ */
+int removerPTporUnidade(Arv23PT **raiz, char *palavra, int unidade, Arv23PT *ref){
     int enc = 0;
-    if(*raiz != NULL){
-        if(ehInfo1(**raiz, palavra)){
-            // enc = buscaBST((*raiz)->info1.versaoIng, unidade);
-            // if(enc)
-            //     Arv23Remover(raiz, palavra);
+    if(ref != NULL){
+        if(strcmp(ref->info1.palavra, palavra) == 0){
+            enc |= percorrerBSTporUnidade(&ref->info1.versaoIng, unidade);
+            if(ref->info1.versaoIng == NULL)
+                enc |= Arv23Remover(raiz, ref->info1.palavra);
         }
-        else if(ehInfo2(**raiz, palavra)){
-            enc = buscaBST((*raiz)->info2.versaoIng, unidade);
-            if(enc)
-                Arv23Remover(raiz, palavra);
+        if(ref->ninfos == 2){
+            enc = removerPTporUnidade(raiz, palavra, unidade, ref->dir) || enc;
+            if(strcmp(ref->info2.palavra, palavra) == 0){
+                enc |= percorrerBSTporUnidade(&ref->info2.versaoIng, unidade);
+                if(ref->info2.versaoIng == NULL)
+                    enc |= Arv23Remover(raiz, ref->info2.palavra);
+            }
         }
-        else{
-            if(strcmp(palavra, (*raiz)->info1.palavra) < 0)
-                removerPTporUnidade(&(*raiz)->esq, palavra, unidade);
-            else if((*raiz)->ninfos == 1 || strcmp(palavra, (*raiz)->info2.palavra) < 0)
-                removerPTporUnidade(&(*raiz)->cen, palavra, unidade);
-            else
-                removerPTporUnidade(&(*raiz)->dir, palavra, unidade);
-        }
+
+        enc |= removerPTporUnidade(raiz, palavra, unidade, ref->esq) || enc;
+        enc |= removerPTporUnidade(raiz, palavra, unidade, ref->cen) || enc;
     }
+    return enc;
 }

@@ -237,7 +237,10 @@ int main(){
                             case 4:
                                 printf("Digite a palavra em português: ");
                                 scanf("%s", palavra);
-                                removerPTporUnidade(&raiz, palavra, unidade);
+                                printf("Digite a unidade: ");
+                                scanf("%d", &unidade);
+                                enc = removerPTporUnidade(&raiz, palavra, unidade, raiz);
+                                enc ? printf("Palavra removida com sucesso!\n") : printf("Palavra não encontrada!\n");
                                 break;
                             case 5:
                                 for(int i = 0; i < 30; i++)
