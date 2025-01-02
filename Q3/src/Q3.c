@@ -67,105 +67,134 @@ Memoria *addKey(Memoria *no, const Info *info, Memoria *filho)
     return (no);
 }
 
-Memoria *quebraNo(Memoria **no, const Info *info, Info *promove, Memoria **filho)
+// Memoria *quebraNo(Memoria **no, const Info *info, Info *promove, Memoria **filho)
+// {
+//     Memoria *maior;
+
+//     if (info->inicio > (*no)->info1->inicio)
+//     {
+//         *promove = *(*no)->info2;
+//         if (filho)
+//             maior = criarNo(info, (*no)->right, *filho);
+//         else
+//             maior = criarNo(info, (*no)->right, NULL);
+//     }
+//     else if (info->inicio > (*no)->info2->inicio)
+//     {
+//         *promove = *info;
+//         if (filho)
+//             maior = criarNo((*no)->info2, *filho, (*no)->right);
+//         else
+//             maior = criarNo((*no)->info2, NULL, (*no)->right);
+//     }
+//     else
+//     {
+//         *promove = *(*no)->info1;
+
+//         maior = criarNo((*no)->info2, (*no)->center, (*no)->right);
+
+//         if ((*no)->info1 == NULL)
+//         {
+//             (*no)->info1 = (Info *)malloc(sizeof(Info));
+//             if ((*no)->info1 == NULL)
+//                 printf("Erro ao alocar memória para info1.\n");
+//         }
+
+//         *(*no)->info1 = *info;
+
+//         if (filho)
+//             (*no)->center = *filho;
+//         else
+//             (*no)->center = NULL;
+//     }
+
+//     (*no)->numKeys = 1;
+
+//     return (maior);
+// }
+
+Memoria *quebraNo(Memoria *no, Info info, Info *promove, Memoria *maiorFilho)
 {
     Memoria *maior;
 
-    if (info->inicio > (*no)->info1->inicio)
+    if (info.inicio > no->info2->inicio)
     {
-        *promove = *(*no)->info2;
-        if (filho)
-            maior = criarNo(info, (*no)->right, *filho);
-        else
-            maior = criarNo(info, (*no)->right, NULL);
+        *promove = *(no->info2);
+        maior = criarNo(&info, no->right, maiorFilho);
     }
-    else if (info->inicio > (*no)->info2->inicio)
+    else if (info.inicio > no->info1->inicio)
     {
-        *promove = *info;
-        if (filho)
-            maior = criarNo((*no)->info2, *filho, (*no)->right);
-        else
-            maior = criarNo((*no)->info2, NULL, (*no)->right);
+        *promove = info;
+        maior = criarNo(&(*(no->info2)), maiorFilho, no->right);
     }
     else
     {
-        *promove = *(*no)->info1;
+        *promove = *(no->info1);
+        maior = criarNo(&(*(no->info2)), no->center, no->right);
 
-        maior = criarNo((*no)->info2, (*no)->center, (*no)->right);
+        *(no->info1) = info;
 
-        if ((*no)->info1 == NULL)
-        {
-            (*no)->info1 = (Info *)malloc(sizeof(Info));
-            if ((*no)->info1 == NULL)
-                printf("Erro ao alocar memória para info1.\n");
-        }
-
-        *(*no)->info1 = *info;
-
-        if (filho)
-            (*no)->center = *filho;
-        else
-            (*no)->center = NULL;
+        no->center = maiorFilho;
     }
 
-    (*no)->numKeys = 1;
+    no->numKeys = 1;
 
     return (maior);
 }
 
-// Memory *insertTree23(Memory **node, Info *info, Info *promote, Memory **father)
-Memoria *insereArv23(Memoria **no, Info *info, Info *promove, Memoria **noPai)
+// Memoria *insereArv23(Memoria **raiz, Info *info, Info *promove, Memoria **pai)
+Memoria *insereArv23(Memoria **no, Info *info, Info *promove, Memoria **pai)
 {
     Info promove1;
-    Memoria *maiorNo = NULL;
+    Memoria *biggerno = NULL;
     if (*no == NULL)
         *no = criarNo(info, NULL, NULL);
 
     else
     {
         if (ehFolha(*no))
-        { 
+        {
             if ((*no)->numKeys == 1)
                 *no = addKey(*no, info, NULL);
             else
             {
-                maiorNo = quebraNo(no, info, promove, NULL);
-                if (noPai == NULL)
-                { 
-                    *no = criarNo(promove, *no, maiorNo);
-                    maiorNo = NULL;
+                biggerno = quebraNo(*no, *info, promove, NULL);
+                if (pai == NULL)
+                {
+                    *no = criarNo(promove, *no, biggerno);
+                    biggerno = NULL;
                 }
             }
         }
         else
-        { 
+        {
             if (info->inicio < (*no)->info1->inicio)
-                maiorNo = insereArv23(&((*no)->left), info, promove, no);
+                biggerno = insereArv23(&((*no)->left), info, promove, no);
             else if ((*no)->numKeys == 1 || info->inicio < (*no)->info2->inicio)
-                maiorNo = insereArv23(&((*no)->center), info, promove, no);
+                biggerno = insereArv23(&((*no)->center), info, promove, no);
             else
-                maiorNo = insereArv23(&((*no)->right), info, promove, no);
-            if (maiorNo)
+                biggerno = insereArv23(&((*no)->right), info, promove, no);
+            if (biggerno)
             {
                 if ((*no)->numKeys == 1)
                 {
-                    *no = addKey(*no, promove, maiorNo);
-                    maiorNo = NULL;
+                    *no = addKey(*no, promove, biggerno);
+                    biggerno = NULL;
                 }
                 else
                 {
-                    maiorNo = quebraNo(no, promove, &promove1, &maiorNo);
-                    if (noPai == NULL)
+                    biggerno = quebraNo(*no, *promove, &promove1, biggerno);
+                    if (pai == NULL)
                     {
-                        *no = criarNo(&promove1, *no, maiorNo);
-                        maiorNo = NULL;
+                        *no = criarNo(&promove1, *no, biggerno);
+                        biggerno = NULL;
                     }
                 }
             }
         }
     }
 
-    return (maiorNo);
+    return (biggerno);
 }
 
 Memoria *buscaEspaco(Memoria *raiz, int quantEspaco)
@@ -503,57 +532,6 @@ static int ehInfo2(Memoria no, int info)
     return (no.numKeys == 2 && info == no.info2->inicio);
 }
 
-Memoria *criarNoRMV(Info info, Memoria *filhoEsq, Memoria *filhoCen)
-{
-    Memoria *no;
-    no = alocarNo23();
-
-    no->info1 = (Info *)malloc(sizeof(Info));
-    if (no->info1 == NULL)
-    {
-        fprintf(stderr, "Erro ao alocar memória para info1\n");
-        exit(EXIT_FAILURE);
-    }
-
-    *(no->info1) = info;
-
-    no->left = filhoEsq;
-    no->center = filhoCen;
-    no->right = NULL;
-    no->numKeys = 1;
-
-    return (no);
-}
-
-Memoria *quebraNoRMV(Memoria *no, Info info, Info *promove, Memoria *maiorFilho)
-{
-    Memoria *maior;
-
-    if (info.inicio > no->info2->inicio)
-    {
-        *promove = *(no->info2);
-        maior = criarNoRMV(info, no->right, maiorFilho);
-    }
-    else if (info.inicio > no->info1->inicio)
-    {
-        *promove = info;
-        maior = criarNoRMV(*(no->info2), maiorFilho, no->right);
-    }
-    else
-    {
-        *promove = *(no->info1);
-        maior = criarNoRMV(*(no->info2), no->center, no->right);
-
-        *(no->info1) = info;
-
-        no->center = maiorFilho;
-    }
-
-    no->numKeys = 1;
-
-    return (maior);
-}
-
 static Info no23MaiorInfo(Memoria *raiz)
 {
     return (raiz->numKeys == 2 ? *(raiz->info2) : *(raiz->info1));
@@ -734,63 +712,6 @@ void freeMemoria(Memoria **raiz)
 
         no23free(raiz);
     }
-}
-
-Memoria *insereMemoria(Memoria **raiz, Info info, Memoria *pai, Info *promove)
-{
-    Memoria *maior;
-    maior = NULL;
-
-    if (*raiz == NULL)
-        *raiz = criarNoRMV(info, NULL, NULL);
-    else
-    {
-        if (ehFolha(*raiz))
-        {
-            if ((*raiz)->numKeys == 1)
-                noAddInfo(*raiz, info, NULL);
-            else
-            {
-                maior = quebraNoRMV(*raiz, info, promove, NULL);
-                if (pai == NULL)
-                {
-                    *raiz = criarNoRMV(*promove, *raiz, maior);
-                    maior = NULL;
-                }
-            }
-        }
-        else
-        {
-            if (info.inicio < (*raiz)->info1->inicio)
-                maior = insereMemoria(&((*raiz)->left), info, *raiz, promove);
-            else if ((*raiz)->numKeys == 1 || info.inicio < (*raiz)->info2->inicio)
-                maior = insereMemoria(&((*raiz)->center), info, *raiz, promove);
-            else
-                maior = insereMemoria(&((*raiz)->right), info, *raiz, promove);
-
-            if (maior != NULL)
-            {
-                if ((*raiz)->numKeys == 1)
-                {
-                    noAddInfo(*raiz, *promove, maior);
-                    maior = NULL;
-                }
-                else
-                {
-                    Info promove_aux;
-                    maior = quebraNoRMV(*raiz, *promove, &promove_aux, maior);
-                    *promove = promove_aux;
-                    if (pai == NULL)
-                    {
-                        *raiz = criarNoRMV(promove_aux, *raiz, maior);
-                        maior = NULL;
-                    }
-                }
-            }
-        }
-    }
-
-    return (maior);
 }
 
 int removeMemoriaNaoFolha1(Memoria **origem, Memoria *raiz, Info *info, Memoria *filho1, Memoria *filho2, Memoria **maior)
