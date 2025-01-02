@@ -83,6 +83,7 @@ int Remover2Arv23(Arv23PT **raiz, char *palavra, Arv23PT *pai, Arv23PT **origem,
 int balanceamento(Arv23PT **raiz, Arv23PT *filho1, Arv23PT **filho2, Info info, Arv23PT **maior);
 int Arv23Rebalancear(Arv23PT **raiz, char *palavra, Arv23PT **maior);
 int Arv23Remover(Arv23PT **raiz, char *palavra);
+int removerMain(Arv23PT **raiz, char *palavraIN, int unidade, Arv23PT *ref);
 
 /*
     Funções Referente ao Item IV

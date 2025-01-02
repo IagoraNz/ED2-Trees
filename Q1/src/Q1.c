@@ -438,6 +438,14 @@ Info maiorFilho(Arv23PT *raiz){
     return raiz->ninfos == 2 ? raiz->info2 : raiz->info1;
 }
 
+/**
+ * @brief Função que busca o maior filho de um nó, ou seja, o filho mais à direita da info
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @param pai: nó pai
+ * @param maiorValor: maior valor
+ * @return Arv23PT*: maior filho
+ */
 Arv23PT *buscarMaiorFilho(Arv23PT *raiz, Arv23PT **pai, Info *maiorValor){
     Arv23PT *filho;
     filho = raiz;
@@ -456,11 +464,25 @@ Arv23PT *buscarMaiorFilho(Arv23PT *raiz, Arv23PT **pai, Info *maiorValor){
     return filho;
 }
 
+/**
+ * @brief Função que desaloca um nó
+ * 
+ * @param no: nó a ser desalocado
+ * @return void
+ */
 void desalocaNo(Arv23PT **no) {
     free(*no);
     *no = NULL;
 }
 
+/**
+ * @brief Função que adiciona uma informação a um nó
+ * 
+ * @param no: nó a ser adicionado a informação
+ * @param info: informação a ser adicionada
+ * @param filhomaior: filho maior
+ * @return void
+ */
 void adicionarInfo(Arv23PT *no, Info info, Arv23PT *filhomaior){
     if(strcmp(info.palavra, no->info1.palavra) > 0){
         no->info2 = info;
@@ -475,6 +497,14 @@ void adicionarInfo(Arv23PT *no, Info info, Arv23PT *filhomaior){
     no->ninfos = 2;
 }
 
+/**
+ * @brief Função que junta um nó com outro
+ * 
+ * @param filho1: filho 1
+ * @param info: informação
+ * @param maior: maior nó
+ * @param raiz: raiz da árvore 2-3 que será desalocada
+ */
 Arv23PT *juntaNo(Arv23PT *filho1, Info info, Arv23PT *maior, Arv23PT **raiz){
     adicionarInfo(filho1, info, maior);
 
@@ -486,14 +516,35 @@ Arv23PT *juntaNo(Arv23PT *filho1, Info info, Arv23PT *maior, Arv23PT **raiz){
     return filho1;
 }
 
+/**
+ * @brief Função que verifica se uma informação é a primeira informação de um nó
+ * 
+ * @param no: nó a ser verificado
+ * @param palavra: palavra a ser verificada
+ * @return int: 1 se a informação é a primeira, 0 caso contrário
+ */
 int ehInfo1(Arv23PT no, char *palavra){
     return strcmp(palavra, no.info1.palavra) == 0;
 }
 
+/**
+ * @brief Função que verifica se uma informação é a segunda informação de um nó
+ * 
+ * @param no: nó a ser verificado
+ * @param palavra: palavra a ser verificada
+ * @return int: 1 se a informação é a segunda, 0 caso contrário
+ */
 int ehInfo2(Arv23PT no, char *palavra){
     return no.ninfos == 2 && (strcmp(palavra, no.info2.palavra) == 0);
 }
 
+/**
+ * @brief Função que busca o pai de um nó
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @param palavra: palavra a ser buscada
+ * @return Arv23PT*: pai do nó
+ */
 Arv23PT *buscapai(Arv23PT *raiz, char *palavra) {
     Arv23PT *pai;
     pai = NULL;
@@ -514,6 +565,13 @@ Arv23PT *buscapai(Arv23PT *raiz, char *palavra) {
     return pai;
 }
 
+/**
+ * @brief Função que busca o maior pai de um nó
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @param palavra: palavra a ser buscada
+ * @return Arv23PT*: maior pai do nó
+ */
 Arv23PT *buscarMaiorPai(Arv23PT *raiz, char *palavra){
     Arv23PT *pai;
     pai = NULL;
@@ -535,6 +593,13 @@ Arv23PT *buscarMaiorPai(Arv23PT *raiz, char *palavra){
     return pai;
 }
 
+/**
+ * @brief Função que busca o menor pai de um nó
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @param palavra: palavra a ser buscada
+ * @return Arv23PT*: menor pai do nó
+ */
 Arv23PT *buscarMenorPai(Arv23PT *raiz, char *palavra){
     Arv23PT *pai;
     pai = NULL;
@@ -555,6 +620,13 @@ Arv23PT *buscarMenorPai(Arv23PT *raiz, char *palavra){
     return pai;
 }
 
+/**
+ * @brief Função que busca o menor pai de um nó com duas informações
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @param palavra: palavra a ser buscada
+ * @return Arv23PT*: menor pai do nó
+ */
 Arv23PT *buscarMenorPai2Infos(Arv23PT *raiz, char *palavra){
     Arv23PT *pai;
     pai = NULL;
@@ -575,6 +647,12 @@ Arv23PT *buscarMenorPai2Infos(Arv23PT *raiz, char *palavra){
     return pai;
 }
 
+/**
+ * @brief Função que desaloca uma árvore 2-3
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @return void
+ */
 void desalocarArv23(Arv23PT **raiz){
     if(*raiz != NULL){
         desalocarArv23(&((*raiz)->esq));
@@ -587,6 +665,17 @@ void desalocarArv23(Arv23PT **raiz){
     }
 }
 
+/**
+ * @brief Função que remove de um nó que não é folha
+ * 
+ * @param origem: nó de origem
+ * @param raiz: raiz da árvore 2-3
+ * @param info: informação a ser removida
+ * @param filho1: filho 1
+ * @param filho2: filho 2
+ * @param maior: maior nó
+ * @return int: 1 se a remoção foi bem sucedida, 0 caso contrário
+ */
 int removerNaoFolha1(Arv23PT **origem, Arv23PT *raiz, Info *info, Arv23PT *filho1, Arv23PT *filho2, Arv23PT **maior){
     int removeu;
     Arv23PT *filho, *pai;
@@ -608,6 +697,17 @@ int removerNaoFolha1(Arv23PT **origem, Arv23PT *raiz, Info *info, Arv23PT *filho
     return removeu;
 }
 
+/**
+ * @brief Função que remove de um nó que não é folha
+ * 
+ * @param origem: nó de origem
+ * @param raiz: raiz da árvore 2-3
+ * @param info: informação a ser removida
+ * @param filho1: filho 1
+ * @param filho2: filho 2
+ * @param maior: maior nó
+ * @return int: 1 se a remoção foi bem sucedida, 0 caso contrário
+ */
 int removerNaoFolha2(Arv23PT **origem, Arv23PT *raiz, Info *info, Arv23PT *filho1, Arv23PT *filho2, Arv23PT **maior){
     int removeu;
     Arv23PT *filho, *pai;
@@ -631,6 +731,16 @@ int removerNaoFolha2(Arv23PT **origem, Arv23PT *raiz, Info *info, Arv23PT *filho
     return removeu;
 }
 
+/**
+ * @brief Função do tipo 1 que remove uma informação de uma árvore 2-3
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @param palavra: palavra a ser removida
+ * @param pai: nó pai
+ * @param origem: nó de origem
+ * @param maior: maior nó
+ * @return int: 1 se a remoção foi bem sucedida, 0 caso contrário
+ */
 int Remover1Arv23(Arv23PT **raiz, char *palavra, Arv23PT *pai, Arv23PT **origem, Arv23PT **maior){
     int removeu = 0;
 
@@ -710,6 +820,16 @@ int Remover1Arv23(Arv23PT **raiz, char *palavra, Arv23PT *pai, Arv23PT **origem,
     return removeu;
 }
 
+/**
+ * @brief Função do tipo 2 que remove uma informação de uma árvore 2-3
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @param palavra: palavra a ser removida
+ * @param pai: nó pai
+ * @param origem: nó de origem
+ * @param maior: maior nó
+ * @return int: 1 se a remoção foi bem sucedida, 0 caso contrário
+ */
 int Remover2Arv23(Arv23PT **raiz, char *palavra, Arv23PT *pai, Arv23PT **origem, Arv23PT **maior){
     int removeu = 0;
 
@@ -784,6 +904,16 @@ int Remover2Arv23(Arv23PT **raiz, char *palavra, Arv23PT *pai, Arv23PT **origem,
     return removeu;
 }
 
+/**
+ * @brief Função que realiza o balanceamento de um nó
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @param filho1: filho 1
+ * @param filho2: filho 2
+ * @param info: informação
+ * @param maior: maior nó
+ * @return int: 1 se o balanceamento foi bem sucedido, 0 caso contrário
+ */
 int balanceamento(Arv23PT **raiz, Arv23PT *filho1, Arv23PT **filho2, Info info, Arv23PT **maior){
     int balanceou = 0;
     if(*filho2 == NULL || (*filho2)->ninfos == 0){
@@ -796,6 +926,14 @@ int balanceamento(Arv23PT **raiz, Arv23PT *filho1, Arv23PT **filho2, Info info, 
     return balanceou;
 }
 
+/**
+ * @brief Função que realiza o rebalanceamento de uma árvore 2-3
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @param palavra: palavra a ser rebalanceada
+ * @param maior: maior nó
+ * @return int: 1 se o rebalanceamento foi bem sucedido, 0 caso contrário
+ */
 int Arv23Rebalancear(Arv23PT **raiz, char *palavra, Arv23PT **maior){
     int balanceou = 0;
     if(*raiz != NULL){
@@ -826,6 +964,13 @@ int Arv23Rebalancear(Arv23PT **raiz, char *palavra, Arv23PT **maior){
     return balanceou;
 }
 
+/**
+ * @brief Função principal que reune todas as funções para remover uma palavra de uma árvore 2-3
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @param palavra: palavra a ser removida
+ * @return int: 1 se a remoção foi bem sucedida, 0 caso contrário
+ */
 int Arv23Remover(Arv23PT **raiz, char *palavra){
     Arv23PT *maior, *posicao;
     int removeu = Remover1Arv23(raiz, palavra, NULL, raiz, &posicao);
@@ -864,64 +1009,69 @@ int Arv23Remover(Arv23PT **raiz, char *palavra){
     return removeu;
 }
 
-int unidadePresenteCount(Unidades *unidades, int unidade, int *cont){
-    int presente = 0;
-    if(unidades != NULL){
-        (*cont)++;
-        if(unidades->unidade == unidade)
-            presente = 1;
-        else
-            presente = unidadePresente(unidades->prox, unidade);
-    }
-    return presente;
-}
-
-void removerPalavraListaEnc(Unidades **unidades, int unidade){
-    Unidades *aux, *ant;
-    aux = *unidades;
-    ant = NULL;
-
-    while(aux != NULL && aux->unidade != unidade){
-        ant = aux;
-        aux = aux->prox;
-    }
-
-    if(aux != NULL){
-        if(ant == NULL)
-            *unidades = aux->prox;
-        else
-            ant->prox = aux->prox;
-
-        free(aux);
-    }
-}
-
-int removerMain(Arv23PT **raiz, char *palavraIN, int unidade){
-    int enc = 0, cont = 0;
-    if(raiz != NULL){
-        enc = removerMain((*raiz)->esq, palavraIN, unidade);
-
-        enc = unidadePresenteCount((*raiz)->info1.versaoIng->info->unidades, unidade, &cont);
-        if(enc){
-            if(cont != 1)
-                removerPalavraListaEnc(&(*raiz)->info1.versaoIng->info->unidades, unidade);
-            else
-                Arv23Remover((*raiz), (*raiz)->info1.palavra);
+/**
+ * @brief Função que remove uma unidade de uma lista encadeada de unidades
+ * 
+ * @param unidades: lista encadeada de unidades
+ * @param unidade: unidade a ser removida
+ * @return void
+ */
+int removerPalavraListaEnc(Unidades **uni, int unidade){
+    int removeu = 1;
+    if((*uni) != NULL){
+        if((*uni)->unidade == unidade){
+            Unidades *aux = *uni;
+            *uni = aux->prox;
+            free(aux);
+            removeu = 1;
         }
+        else
+            removerPalavraListaEnc(&(*uni)->prox, unidade);
+    }
+    return removeu;
+}
 
-        enc = removerMain((*raiz)->cen, palavraIN, unidade);
+int percorrerBST(IngPTBST **raiz, int unidade, char *palavraIN){
+    int enc = 0;
+    if((*raiz) != NULL){
+        enc = percorrerBST(&(*raiz)->esq, unidade, palavraIN);
+        enc = percorrerBST(&(*raiz)->dir, unidade, palavraIN);
+        if(strcmp((*raiz)->info->palavra, palavraIN) == 0)
+            enc = removerPalavraListaEnc(&(*raiz)->info->unidades, unidade);
+        if(enc && (*raiz)->info->unidades == NULL)
+            removerBST(raiz, (*raiz)->info->palavra);
+    }
+    return enc;
+}
+
+/**
+ * @brief Função que recebe uma palavra em inglês e a sua unidade para removê-la das árvores binárias das
+ * quais ela pertence. Caso ela seja a única palavra em uma das árvores binárias, remover também da árvore 2-3
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @param palavraIN: palavra a ser removida
+ * @param unidade: unidade da palavra
+ * @return int: 1 se a remoção foi bem sucedida, 0 caso contrário
+ */
+int removerMain(Arv23PT **raiz, char *palavraIN, int unidade, Arv23PT *ref){
+    int enc = 0;
+    if(ref != NULL){
+        enc = removerMain(raiz, palavraIN, unidade, ref->esq);
+
+        enc = percorrerBST(&ref->info1.versaoIng, unidade, palavraIN);
+        if((*raiz)->info1.versaoIng == NULL)
+            Arv23Remover(raiz, ref->info1.palavra);
+
+        enc = removerMain(raiz, palavraIN, unidade, ref->cen);
 
         if((*raiz)->ninfos == 2){
-            enc = unidadePresenteCount((*raiz)->info2.versaoIng->info->unidades, unidade, &cont);
-            if(enc){
-                if(cont != 1)
-                    removerPalavraListaEnc(&(*raiz)->info2.versaoIng->info->unidades, unidade);
-                else
-                    Arv23Remover((*raiz), (*raiz)->info2.palavra);
-            }
-            enc = removerMain((*raiz)->dir, palavraIN, unidade);
+            enc = percorrerBST(&ref->info2.versaoIng, unidade, palavraIN);
+            if((*raiz)->info2.versaoIng == NULL)
+                Arv23Remover(raiz, ref->info2.palavra);
+            enc = removerMain(raiz, palavraIN, unidade, ref->dir);
         }
     }
+    return enc;
 }
 
 /*-----------------------------------------------------------------------------------------------------*/
