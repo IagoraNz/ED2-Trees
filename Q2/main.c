@@ -3,31 +3,174 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "src/Q2.h"
+#include <time.h>
 
+/**
+ * @brief Função que preenche uma árvore vermelho e preta com palavras aleatórias
+ * 
+ * @param raiz: raiz da árvore vermelho e preta
+ * @return void
+ */
+void preencherVP(ArvVP **raiz){
+    InfoArvBin info;
+    int i;
+
+    srand(time(NULL));
+
+    for(i = 0; i < 100; i++){
+        info.palavraPortugues = (char *)malloc(50 * sizeof(char));
+        info.arvBinIngles = (IngPTBST *)malloc(sizeof(IngPTBST));
+        info.arvBinIngles->info.unidades = (Unidades *)malloc(sizeof(Unidades));
+        info.arvBinIngles->info.unidades->prox = NULL;
+        info.arvBinIngles->esq = NULL;
+        info.arvBinIngles->dir = NULL;
+        info.arvBinIngles->info.palavraIngles = (char *)malloc(50 * sizeof(char));
+
+        int randNum = rand() % 1000;
+
+        sprintf(info.palavraPortugues, "palavra%d", randNum);
+        sprintf(info.arvBinIngles->info.palavraIngles, "word%d", randNum);
+        info.arvBinIngles->info.unidades->unidade = rand() + 1;
+
+        insere(raiz, info);
+    }
+}
+
+/**
+ * @brief Função que realiza a busca de uma palavra em uma árvore vermelho e preta
+ * 
+ * @param raiz: raiz da árvore vermelho e preta
+ * @param palavra: palavra a ser buscada
+ * @return int: 1 se a palavra foi encontrada, 0 caso contrário
+ */
+int buscarVP(ArvVP *raiz, char *palavra){
+    int encontrou = 0;
+    if (raiz != NULL){
+        if (strcmp(raiz->info.palavraPortugues, palavra) == 0)
+            encontrou = 1;
+        else if (strcmp(raiz->info.palavraPortugues, palavra) > 0)
+            encontrou = buscarVP(raiz->esq, palavra); 
+        else
+            encontrou = buscarVP(raiz->dir, palavra);
+    }
+    return encontrou;
+}
+
+/**
+ * @brief Função que metrifica uma unidade em uma árvore vermelho e preta
+ * 
+ * @param raiz: raiz da árvore vermelho e preta
+ * @param unidade: unidade a ser metrificada
+ * @return void
+ */
+void metrificarbusca(){
+    clock_t inicio, fim;
+    double tempo, media = 0;
+    ArvVP *raizMet = NULL;
+    int i;
+    char palavra[50];
+
+    preencherVP(&raizMet);
+
+    for(i = 0; i < 30; i++){
+        int randNum = rand() % 1000;
+        sprintf(palavra, "palavra%d", randNum);
+        inicio = clock();
+        buscarVP(raizMet, palavra);
+        fim = clock();
+        tempo = ((double)(fim - inicio)) / CLOCKS_PER_SEC / 30;
+        media += tempo;
+    }
+
+    printf("Tempo médio de busca: %f\n", media);
+}
+
+/**
+ * @brief Função que exibe uma árvore vermelho e preta em ordem
+ * 
+ * @param raiz: raiz da árvore vermelho e preta
+ * @return void
+ */
+void exibirArvVPEmOrdem(ArvVP *raiz){
+    if (raiz != NULL){
+        exibirArvVPEmOrdem(raiz->esq);
+        printf("%s\n", raiz->info.palavraPortugues);
+        exibirArvVPEmOrdem(raiz->dir);
+    }
+}
+
+
+
+/**
+ * @brief Função que insere uma info em uma árvore vermelho e preta
+ * 
+ * @param raiz: raiz da árvore
+ * @param info: info a ser inserida
+ * @return int: 1 se a inserção foi bem-sucedida, 0 caso contrário
+ */
 void insere(ArvVP **raiz, InfoArvBin info) {
     int resultado;
     resultado = inserirArvVP(raiz, info);
-    // Verificar o resultado
-    if (resultado == 1) {
+    if(resultado == 1)
         printf("Insercao bem-sucedida!\n");
-    } else {
-        printf("Erro ao inserir.\n");
-    }
+    else
+        printf("Tentativa de inserir falhou! Tente novamente...\n");
     (*raiz)->cor = 1;
 }
 
-void menu() {
-    printf("\n==============================================\n");
-    printf("1 - Palavras por Unidade\n");
-    printf("2 - Palavras em Portugues\n");
-    printf("3 - Remover palavra em Ingles\n");
-    printf("4 - Remover palavra em Portugues\n");
-    printf("5 - Metrificar tempo busca\n");
-    printf("0 - Sair\n");
-    printf("==============================================\n");
-    printf("Opcao: ");
+/**
+ * @brief Função que exibe o menu principal
+ * 
+ * @return void
+ */
+void menuprincipal(){
+    printf("                                         \n");
+    printf("       M E N U   P R I N C I P A L       \n");
+    printf("                                         \n");
+    printf(" 1. Menu geral                           \n");
+    printf(" 2. Sair do programa                     \n");
+    printf("                                         \n");
+    printf(" Developers:                             \n");
+    printf("      I. Iago Roberto Esmerio Almeida    \n");
+    printf("      II. Francinaldo de Sousa Barbosa   \n");
+    printf("                                         \n");
+    printf(" Professora:                             \n");
+    printf("      Juliana Oliveira de Carvalho       \n");
+    printf("                                         \n");
+    printf("                                         \n");
+    printf("                    Aproveite o sistema! \n");
+    printf("                                         \n");
+    printf("                                         \n");
+    printf(" Pressione o numero para                 \n");
+    printf(" escolher o menu...                      \n");
+    printf("\n");
 }
 
+/**
+ * @brief Função que exibe o menu geral
+ * 
+ * @return void
+ */
+void menugeral(){
+    printf("                                          \n");
+    printf("            M E N U   G E R A L           \n");
+    printf("                                          \n");
+    printf(" Item I. Exibir palavras por unidade      \n");
+    printf(" Item II. Exibir palavras em português    \n");
+    printf(" Item III. Remover palavra em inglês      \n");
+    printf(" Item IV. Remover palavra em português    \n");
+    printf(" Item V. Metrificar busca                 \n");
+    printf(" Item VI. Visualizar 2-3                  \n");
+    printf(" 0. Sair do programa                      \n");
+    printf("\n");
+}
+
+/**
+ * @brief Função que exibe as unidades
+ * 
+ * @param raiz: raiz da árvore
+ * @return void
+ */
 void exibirUnidades(Unidades *raiz){
     if (raiz != NULL){
         printf("%d, ", raiz->unidade);
@@ -35,6 +178,12 @@ void exibirUnidades(Unidades *raiz){
     }
 }
 
+/**
+ * @brief Função que exibe as palavras em inglês da árvore BST
+ * 
+ * @param raiz: raiz da árvore BST
+ * @return void
+ */
 void exibirIngles(IngPTBST *raiz){
     if (raiz != NULL){
         exibirIngles(raiz->esq);
@@ -44,6 +193,12 @@ void exibirIngles(IngPTBST *raiz){
     }
 }
 
+/**
+ * @brief Função que exibe as palavras da árvore vermelho e preta
+ * 
+ * @param raiz: raiz da árvore vermelho e preta
+ * @return void
+ */
 void exibirPalavras(ArvVP *raiz){
     if (raiz != NULL){
         exibirPalavras(raiz->esq);
@@ -53,6 +208,12 @@ void exibirPalavras(ArvVP *raiz){
     }
 }
 
+/**
+ * @brief Função que realiza o ltrim, removendo espaços na esquerda da string
+ * 
+ * @param str: string a ser tratada
+ * @return void
+ */
 void ltrim(char *str) {
     if (str != NULL && str[0] == ' ') {
         memmove(str, str + 1, strlen(str)); 
@@ -64,7 +225,6 @@ int main() {
     char linha[200];
     int unidadeAtual = 0, sucesso = 1;
 
-    // Iniciando Leitura do Arquivo exemplo.txt
     FILE *arquivo;
     arquivo = fopen("../exemplo.txt", "r");
 
@@ -73,7 +233,6 @@ int main() {
         sucesso = 0;
     }
     if (sucesso = 1) {
-            // Loop para leitura do arquivo:
         while (fgets(linha, sizeof(linha), arquivo) != NULL) {
             // Remover a nova linha no final da linha lida
             linha[strcspn(linha, "\n")] = '\0';
@@ -84,14 +243,12 @@ int main() {
             else if (linha[0] != '\0' && linha[0] != '%') {
             char palavraIN[50];
 
-                // Separar a palavra em inglês (à esquerda do ':')
                 char *token = strtok(linha, ":");
                 if (token != NULL) {
                     strcpy(palavraIN, token);
                 }
                 ltrim(palavraIN);
 
-                // Processar as palavras em português (à direita do ':')
                 token = strtok(NULL, ";");
                 if (token != NULL) {
                     char *palavra = strtok(token, ",");
@@ -112,63 +269,69 @@ int main() {
                         info.arvBinIngles->info.unidades->unidade = unidadeAtual;
 
                         insere(&raiz, info); 
-                        palavra = strtok(NULL, ","); // Próxima palavra em português
+                        palavra = strtok(NULL, ",");
                     }
                 }
             }
         }
 
-        // Fechar o arquivo após a leitura
         fclose(arquivo);
         int enc = 0;
         int op = 0, unidade = 0;
         char palavra[50];
 
-        do
-        {
-            exibirPalavras(raiz);
-            enc = 0;
-            menu();
+        do{
+            menuprincipal();
             scanf("%d", &op);
-            getchar();
-            switch (op)
-            {
-            case 1:
-                printf("Informe a unidade: ");
-                scanf("%d", &unidade);
-                exibirUnidade(raiz, unidade, &enc);
-                break;
-            case 2:
-                printf("Informe a palavra em portugues: ");
-                scanf("%[^\n]", palavra);
-                getchar();
-                exibirArvBinPT(raiz, palavra);
-                break;
-            case 3:
-                printf("Informe a palavra em ingles: ");
-                scanf("%[^\n]", palavra);
-                getchar();
-                printf("Informe a unidade: ");
-                scanf("%d", &unidade);
-                removerArvVPEN(&raiz, palavra, unidade);
-                break;
-            case 4:
-                printf("Informe a palavra em portugues: ");
-                scanf("%[^\n]", palavra);
-                getchar();
-                printf("Informe a unidade: ");
-                scanf("%d", &unidade);
-                removerArvVPPTBR(&raiz, palavra, unidade);
-                break;
-            case 0:
-                printf("Saindo...\n");
-                break;
-            default:
-                printf("Opcao invalida!\n");
-                break;
+            switch(op){
+                case 1:
+                    do{
+                        menugeral();
+                        scanf("%d", &op);
+                        switch(op){
+                            case 1:
+                                exibirPalavras(raiz);
+                                break;
+                            case 2:
+                                exibirIngles(raiz->info.arvBinIngles);
+                                break;
+                            case 3:
+                                printf("Digite a palavra em inglês a ser removida: ");
+                                scanf("%s", palavra);
+                                removerArvVP(&raiz, palavra);
+                                break;
+                            case 4:
+                                printf("Digite a palavra em português a ser removida: ");
+                                scanf("%s", palavra);
+                                removerArvVP(&raiz, palavra);
+                                break;
+                            case 5:
+                                printf("Digite a unidade a ser metrificada: ");
+                                scanf("%d", &unidade);
+                                metrificar(raiz, unidade);
+                                break;
+                            case 6:
+                                printf("Visualização 2-3\n");
+                                break;
+                            case 0:
+                                printf("Saindo do menu geral...\n");
+                                break;
+                            default:
+                                printf("Opção inválida! Tente novamente...\n");
+                                break;
+                        }
+                    }while(op != 0);
+                    break;
+
+                case 2:
+                    printf("Saindo do programa...\n");
+                    break;
+                default:
+                    printf("Opção inválida! Tente novamente...\n");
+                    break;
             }
-        } while (op != 0);
+        }while(op != 2);
     }
     
-    return sucesso == 1 ? 0 : 1;
+    return 0;
 }
