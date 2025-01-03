@@ -51,6 +51,8 @@ typedef struct arvvp
 
 int inserirArvVP(ArvVP **raiz, InfoArvBin info);
 
+int removerArvVP(ArvVP **raiz, char *palavraPT);
+
 void removerArvVPEN(ArvVP **raiz, const char *palavraEN, int unidade);
 
 void removerArvVPPTBR(ArvVP **raiz, char *palavraPT, int unidade);

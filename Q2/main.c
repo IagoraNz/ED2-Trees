@@ -6,6 +6,19 @@
 #include <time.h>
 
 /**
+ * @brief Função que insere uma info em uma árvore vermelho e preta
+ * 
+ * @param raiz: raiz da árvore
+ * @param info: info a ser inserida
+ * @return int: 1 se a inserção foi bem-sucedida, 0 caso contrário
+ */
+void insere(ArvVP **raiz, InfoArvBin info) {
+    int resultado;
+    resultado = inserirArvVP(raiz, info);
+    (*raiz)->cor = 1;
+}
+
+/**
  * @brief Função que preenche uma árvore vermelho e preta com palavras aleatórias
  * 
  * @param raiz: raiz da árvore vermelho e preta
@@ -82,7 +95,7 @@ void metrificarbusca(){
         media += tempo;
     }
 
-    printf("Tempo médio de busca: %f\n", media);
+    printf("Tempo médio de busca: %.9f\n", media);
 }
 
 /**
@@ -94,29 +107,60 @@ void metrificarbusca(){
 void exibirArvVPEmOrdem(ArvVP *raiz){
     if (raiz != NULL){
         exibirArvVPEmOrdem(raiz->esq);
-        printf("%s\n", raiz->info.palavraPortugues);
+        if(raiz->cor == 1)
+            printf("[P] %s\n", raiz->info.palavraPortugues);
+        else
+            printf("[V] %s\n", raiz->info.palavraPortugues);
         exibirArvVPEmOrdem(raiz->dir);
     }
 }
 
-
-
 /**
- * @brief Função que insere uma info em uma árvore vermelho e preta
+ * @brief Função que exibe o caminho percorrido em uma busca em uma árvore vermelho e preta
  * 
- * @param raiz: raiz da árvore
- * @param info: info a ser inserida
- * @return int: 1 se a inserção foi bem-sucedida, 0 caso contrário
+ * @param raiz: raiz da árvore vermelho e preta
+ * @param palavra: palavra a ser buscada
+ * @param nivel: nível da árvore
+ * @return void
  */
-void insere(ArvVP **raiz, InfoArvBin info) {
-    int resultado;
-    resultado = inserirArvVP(raiz, info);
-    if(resultado == 1)
-        printf("Insercao bem-sucedida!\n");
+void buscarVPComCaminho(ArvVP *raiz, const char *palavra, int nivel){
+    int i;
+
+    if (raiz == NULL) {
+        for (i = 0; i < nivel; i++)
+            printf("  ");
+        printf("NULL\n");
+        return;
+    }
+
+    for (i = 0; i < nivel; i++)
+        printf("  ");
+    if (raiz->cor == 1)
+        printf("[P] %s\n", raiz->info.palavraPortugues);
     else
-        printf("Tentativa de inserir falhou! Tente novamente...\n");
-    (*raiz)->cor = 1;
+        printf("[V] %s\n", raiz->info.palavraPortugues);
+
+    if (strcmp(raiz->info.palavraPortugues, palavra) == 0) {
+        for (i = 0; i < nivel; i++)
+            printf("  ");
+        printf("ENCONTRADO\n");
+        return;
+    }
+
+    if (strcmp(palavra, raiz->info.palavraPortugues) < 0) {
+        for (i = 0; i < nivel; i++)
+            printf("  ");
+        printf("ESQ -->\n");
+        buscarVPComCaminho(raiz->esq, palavra, nivel + 1);
+    } 
+    else {
+        for (i = 0; i < nivel; i++)
+            printf("  ");
+        printf("DIR -->\n");
+        buscarVPComCaminho(raiz->dir, palavra, nivel + 1);
+    }
 }
+
 
 /**
  * @brief Função que exibe o menu principal
@@ -160,7 +204,8 @@ void menugeral(){
     printf(" Item III. Remover palavra em inglês      \n");
     printf(" Item IV. Remover palavra em português    \n");
     printf(" Item V. Metrificar busca                 \n");
-    printf(" Item VI. Visualizar 2-3                  \n");
+    printf(" Item VI. Visualizar VP                   \n");
+    printf(" Item VII. Visualizar caminho             \n");
     printf(" 0. Sair do programa                      \n");
     printf("\n");
 }
@@ -226,7 +271,7 @@ int main() {
     int unidadeAtual = 0, sucesso = 1;
 
     FILE *arquivo;
-    arquivo = fopen("../exemplo.txt", "r");
+    arquivo = fopen("exemploQ2.txt", "r");
 
     if (arquivo == NULL) {
         printf("Erro ao abrir o arquivo.\n");
@@ -276,17 +321,18 @@ int main() {
         }
 
         fclose(arquivo);
-        int enc = 0;
-        int op = 0, unidade = 0;
+        int enc = 0, op = 0, unidade = 0, i;
         char palavra[50];
 
         do{
             menuprincipal();
+            printf("Digite a opção desejada: ");
             scanf("%d", &op);
             switch(op){
                 case 1:
                     do{
                         menugeral();
+                        printf("Digite a opção desejada: ");
                         scanf("%d", &op);
                         switch(op){
                             case 1:
@@ -306,12 +352,17 @@ int main() {
                                 removerArvVP(&raiz, palavra);
                                 break;
                             case 5:
-                                printf("Digite a unidade a ser metrificada: ");
-                                scanf("%d", &unidade);
-                                metrificar(raiz, unidade);
+                                for(i = 0; i < 100; i++)
+                                    metrificarbusca();
                                 break;
                             case 6:
-                                printf("Visualização 2-3\n");
+                                printf("Visualização da árvore VP\n");
+                                exibirArvVPEmOrdem(raiz);
+                                break;
+                            case 7:
+                                printf("Digite a palavra a ser buscada: ");
+                                scanf("%s", palavra);
+                                buscarVPComCaminho(raiz, palavra, 0);
                                 break;
                             case 0:
                                 printf("Saindo do menu geral...\n");
