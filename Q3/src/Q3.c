@@ -67,56 +67,32 @@ Memoria *addKey(Memoria *no, const Info *info, Memoria *filho)
     return (no);
 }
 
-// Memoria *quebraNo(Memoria **no, const Info *info, Info *promove, Memoria **filho)
-// {
-//     Memoria *maior;
+void addInfo(Memoria *no, Info info, Memoria *maiorFilho)
+{
+    Info *novaInfo = (Info *)malloc(sizeof(Info));
+    if (novaInfo != NULL)
+    {
+        *novaInfo = info;
 
-//     if (info->inicio > (*no)->info1->inicio)
-//     {
-//         *promove = *(*no)->info2;
-//         if (filho)
-//             maior = criarNo(info, (*no)->right, *filho);
-//         else
-//             maior = criarNo(info, (*no)->right, NULL);
-//     }
-//     else if (info->inicio > (*no)->info2->inicio)
-//     {
-//         *promove = *info;
-//         if (filho)
-//             maior = criarNo((*no)->info2, *filho, (*no)->right);
-//         else
-//             maior = criarNo((*no)->info2, NULL, (*no)->right);
-//     }
-//     else
-//     {
-//         *promove = *(*no)->info1;
-
-//         maior = criarNo((*no)->info2, (*no)->center, (*no)->right);
-
-//         if ((*no)->info1 == NULL)
-//         {
-//             (*no)->info1 = (Info *)malloc(sizeof(Info));
-//             if ((*no)->info1 == NULL)
-//                 printf("Erro ao alocar memória para info1.\n");
-//         }
-
-//         *(*no)->info1 = *info;
-
-//         if (filho)
-//             (*no)->center = *filho;
-//         else
-//             (*no)->center = NULL;
-//     }
-
-//     (*no)->numKeys = 1;
-
-//     return (maior);
-// }
+        if (info.inicio > no->info1->inicio)
+        {
+            no->info2 = novaInfo;
+            no->right = maiorFilho;
+        }
+        else
+        {
+            no->info2 = no->info1;
+            no->right = no->center;
+            no->center = maiorFilho;
+            no->info1 = novaInfo;
+        }
+        no->numKeys = 2;
+    }
+}
 
 Memoria *quebraNo(Memoria *no, Info info, Info *promove, Memoria *maiorFilho)
 {
     Memoria *maior;
-
     if (info.inicio > no->info2->inicio)
     {
         *promove = *(no->info2);
@@ -125,111 +101,119 @@ Memoria *quebraNo(Memoria *no, Info info, Info *promove, Memoria *maiorFilho)
     else if (info.inicio > no->info1->inicio)
     {
         *promove = info;
-        maior = criarNo(&(*(no->info2)), maiorFilho, no->right);
+        maior = criarNo(no->info2, maiorFilho, no->right);
     }
     else
     {
         *promove = *(no->info1);
-        maior = criarNo(&(*(no->info2)), no->center, no->right);
-
-        *(no->info1) = info;
-
+        maior = criarNo(no->info2, no->center, no->right);
+        no->info1 = &info;
         no->center = maiorFilho;
     }
-
     no->numKeys = 1;
 
     return (maior);
 }
 
-// Memoria *insereArv23(Memoria **raiz, Info *info, Info *promove, Memoria **pai)
-Memoria *insereArv23(Memoria **no, Info *info, Info *promove, Memoria **pai)
+Memoria *insereArv23(Memoria **raiz, Info info, Memoria *pai, Info *promove)
 {
-    Info promove1;
-    Memoria *biggerno = NULL;
-    if (*no == NULL)
-        *no = criarNo(info, NULL, NULL);
+    Memoria *maior;
+    maior = NULL;
 
+    if (*raiz == NULL)
+        *raiz = criarNo(&info, NULL, NULL);
     else
     {
-        if (ehFolha(*no))
+        if (ehFolha(*raiz))
         {
-            if ((*no)->numKeys == 1)
-                *no = addKey(*no, info, NULL);
+            if ((*raiz)->numKeys == 1)
+                addInfo(*raiz, info, NULL);
             else
             {
-                biggerno = quebraNo(*no, *info, promove, NULL);
+                maior = quebraNo(*raiz, info, promove, NULL);
                 if (pai == NULL)
                 {
-                    *no = criarNo(promove, *no, biggerno);
-                    biggerno = NULL;
+                    *raiz = criarNo(promove, *raiz, maior);
+                    maior = NULL;
                 }
             }
         }
         else
         {
-            if (info->inicio < (*no)->info1->inicio)
-                biggerno = insereArv23(&((*no)->left), info, promove, no);
-            else if ((*no)->numKeys == 1 || info->inicio < (*no)->info2->inicio)
-                biggerno = insereArv23(&((*no)->center), info, promove, no);
+            if (info.inicio < (*raiz)->info1->inicio)
+                maior = insereArv23(&((*raiz)->left), info, *raiz, promove);
+            else if ((*raiz)->numKeys == 1 || info.inicio < (*raiz)->info2->inicio)
+                maior = insereArv23(&((*raiz)->center), info, *raiz, promove);
             else
-                biggerno = insereArv23(&((*no)->right), info, promove, no);
-            if (biggerno)
+                maior = insereArv23(&((*raiz)->right), info, *raiz, promove);
+
+            if (maior != NULL)
             {
-                if ((*no)->numKeys == 1)
+                if ((*raiz)->numKeys == 1)
                 {
-                    *no = addKey(*no, promove, biggerno);
-                    biggerno = NULL;
+                    addInfo(*raiz, *promove, maior);
+                    maior = NULL;
                 }
                 else
                 {
-                    biggerno = quebraNo(*no, *promove, &promove1, biggerno);
+                    Info promove_aux;
+                    maior = quebraNo(*raiz, *promove, &promove_aux, maior);
+                    *promove = promove_aux;
                     if (pai == NULL)
                     {
-                        *no = criarNo(&promove1, *no, biggerno);
-                        biggerno = NULL;
+                        *raiz = criarNo(&promove_aux, *raiz, maior);
+                        maior = NULL;
                     }
                 }
             }
         }
     }
 
-    return (biggerno);
+    return (maior);
 }
 
-Memoria *buscaEspaco(Memoria *raiz, int quantEspaco)
+int avaliarQuant(Info info)
 {
-    Memoria *resultado = NULL;
+    return (info.fim - info.inicio + 1);
+}
 
-    if (raiz != NULL)
+Memoria *buscaEspaco(Memoria **raiz, int quant, int status, Info **info)
+{
+    Memoria *no;
+    if (*raiz != NULL)
     {
-        for (int i = 0; i < raiz->numKeys; i++)
+        no = buscaEspaco(&((*raiz)->left), quant, status, info);
+
+        if (*info == NULL)
         {
-            Info *infoAtual = (i == 0) ? raiz->info1 : raiz->info2;
-
-            if (infoAtual->status == LIVRE)
+            if ((*raiz)->info1->status == status && avaliarQuant(*((*raiz)->info1)) >= quant)
             {
-                int espacoLivre = infoAtual->fim - infoAtual->inicio + 1;
-
-                if (espacoLivre >= quantEspaco)
-                    resultado = raiz;
+                *info = (*raiz)->info1;
+                no = *raiz;
+            }
+            else
+            {
+                no = buscaEspaco(&((*raiz)->center), quant, status, info);
+                if ((*raiz)->numKeys == 2)
+                {
+                    if ((*raiz)->info2->status == status && avaliarQuant(*((*raiz)->info2)) >= quant)
+                    {
+                        *info = (*raiz)->info2;
+                        no = *raiz;
+                    }
+                    else if (*info == NULL)
+                        no = buscaEspaco(&((*raiz)->right), quant, status, info);
+                }
             }
         }
-
-        if (resultado == NULL)
-        {
-            resultado = buscaEspaco(raiz->left, quantEspaco);
-
-            if (resultado == NULL)
-                resultado = buscaEspaco(raiz->center, quantEspaco);
-
-            if (resultado == NULL && raiz->numKeys == 2)
-                resultado = buscaEspaco(raiz->right, quantEspaco);
-        }
     }
+    else
+        *info = NULL;
 
-    return (resultado);
+    return (no);
 }
+
+
 
 void exibirInfos(Memoria *raiz)
 {
@@ -247,195 +231,236 @@ void exibirInfos(Memoria *raiz)
     }
 }
 
-int alocaEspaco(Memoria **raiz, int quantEspaco, int *return_inicio)
+Memoria *insereMemoriaNo(Memoria **raiz, Info info, Memoria *pai, Info *promove)
 {
-    Memoria *no = buscaEspaco(*raiz, quantEspaco);
-    int tamEspaco = 0;
+    Memoria *maior;
+    maior = NULL;
 
-    if (no)
+    if (*raiz == NULL)
+        *raiz = criarNo(&info, NULL, NULL);
+    else
     {
-        Info *infoDestino = NULL;
-        int espacoLivre = 0;
-
-        if (no->info1 && no->info1->status == LIVRE)
+        if (ehFolha(*raiz))
         {
-            espacoLivre = no->info1->fim - no->info1->inicio + 1;
-            if (espacoLivre >= quantEspaco)
-                infoDestino = no->info1;
-        }
-
-        if (!infoDestino && no->info2 && no->info2->status == LIVRE)
-        {
-            espacoLivre = no->info2->fim - no->info2->inicio + 1;
-            if (espacoLivre >= quantEspaco)
-                infoDestino = no->info2;
-        }
-
-        if (infoDestino)
-        {
-            int novoEndOcupado = infoDestino->inicio + quantEspaco - 1;
-
-            Info *novaInfoOcupada = criarInfo(infoDestino->inicio, novoEndOcupado, OCUPADO);
-            *return_inicio = infoDestino->inicio;
-            tamEspaco = espacoLivre;
-
-            if (infoDestino == no->info1)
-                no->info1 = novaInfoOcupada;
-            else if (infoDestino == no->info2)
-                no->info2 = novaInfoOcupada;
-
-            if (espacoLivre > quantEspaco)
+            if ((*raiz)->numKeys == 1)
+                noAddInfo(*raiz, info, NULL);
+            else
             {
-                int restoInicio = novoEndOcupado + 1;
-                int restoFim = infoDestino->fim;
-                Info *remainingInfo = criarInfo(restoInicio, restoFim, LIVRE);
-                Info promove;
-                insereArv23(raiz, remainingInfo, &promove, NULL);
+                maior = quebraNo(*raiz, info, promove, NULL);
+                if (pai == NULL)
+                {
+                    *raiz = criarNo(&(*promove), *raiz, maior);
+                    maior = NULL;
+                }
             }
-
-            printf("Espaço alocado com sucesso.\n");
         }
         else
-            printf("Espaço insuficiente na memória\n");
+        {
+            if (info.inicio < (*raiz)->info1->inicio)
+                maior = insereMemoriaNo(&((*raiz)->left), info, *raiz, promove);
+            else if ((*raiz)->numKeys == 1 || info.inicio < (*raiz)->info2->inicio)
+                maior = insereMemoriaNo(&((*raiz)->center), info, *raiz, promove);
+            else
+                maior = insereMemoriaNo(&((*raiz)->right), info, *raiz, promove);
+
+            if (maior != NULL)
+            {
+                if ((*raiz)->numKeys == 1)
+                {
+                    noAddInfo(*raiz, *promove, maior);
+                    maior = NULL;
+                }
+                else
+                {
+                    Info promove_aux;
+                    maior = quebraNo(*raiz, *promove, &promove_aux, maior);
+                    *promove = promove_aux;
+                    if (pai == NULL)
+                    {
+                        *raiz = criarNo(&promove_aux, *raiz, maior);
+                        maior = NULL;
+                    }
+                }
+            }
+        }
+    }
+
+    return maior;
+}
+
+Memoria *insereMemoria(Memoria **raiz, Info info)
+{
+    Info promove;
+    return insereMemoriaNo(raiz, info, NULL, &promove);
+}
+
+static int ehInfo1(Memoria no, int info)
+{
+    return (info == no.info1->inicio);
+}
+
+static int ehInfo2(Memoria no, int info)
+{
+    return (no.numKeys == 2 && info == no.info2->inicio);
+}
+
+Memoria *buscaMenorNoPai(Memoria *raiz, int info)
+{
+    Memoria *pai;
+    pai = NULL;
+
+    if (raiz != NULL)
+    {
+        if (!ehInfo1(*raiz, info) && !ehInfo2(*raiz, info))
+        {
+            if (info < raiz->info1->inicio)
+                pai = buscaMenorNoPai(raiz->left, info);
+            else if (raiz->numKeys == 1 || info < raiz->info2->inicio)
+                pai = buscaMenorNoPai(raiz->center, info);
+            else
+                pai = buscaMenorNoPai(raiz->right, info);
+
+            if (pai == NULL && raiz->info1->inicio < info)
+                pai = raiz;
+        }
+    }
+
+    return (pai);
+}
+
+Memoria *buscaMenorBloco(Memoria **raiz, Memoria *no, Info *info, Info **menorValor)
+{
+    Memoria *menor, *pai;
+    *menorValor = NULL;
+
+    if (ehFolha(no))
+    {
+        if (no->info1->inicio != info->inicio)
+            menor = no;
+        else
+            menor = buscaMenorNoPai(*raiz, info->inicio);
+
+        if (menor != NULL)
+        {
+            if (menor->numKeys == 2 && menor->info2->inicio < info->inicio)
+                *menorValor = menor->info2;
+            else
+                *menorValor = menor->info1;
+        }
+    }
+    else if (no->info1->inicio == info->inicio)
+        menor = buscaMaiorFilho(no->left, &pai, menorValor);
+    else
+        menor = buscaMaiorFilho(no->center, &pai, menorValor);
+
+    return menor;
+}
+
+Memoria *buscaMaiorBloco(Memoria **raiz, Memoria *no, Info *info, Info **maiorValor)
+{
+    Memoria *Maior;
+    Memoria *pai;
+    *maiorValor = NULL;
+
+    if(ehFolha(no))
+    {
+        if(no->numKeys == 2 && no->info1->inicio == info->inicio)
+            Maior = no;
+        else
+            Maior = buscaMaiorNoPai(*raiz, info->inicio);
+
+        if(Maior != NULL)
+        {
+            if(Maior->info1->inicio > info->inicio)
+                *maiorValor = Maior->info1;
+            else
+                *maiorValor = Maior->info2;
+        }
     }
     else
-        printf("Espaço insuficiente na memória\n");
+    {
+        if(no->info1->inicio == info->inicio)
+            Maior = buscaMenorFilho(no->center, &pai);
+        else
+            Maior = buscaMenorFilho(no->right, &pai);
 
-    return (tamEspaco);
+        if(Maior != NULL)
+            *maiorValor = Maior->info1;
+    }
+
+    return (Maior);
 }
 
-void freeEspaco(Memoria *memoria, int inicio, int fim)
+void concatenaNo(Memoria **raiz, int *ultimoNum, int limite, int valorRemove)
 {
-    if (memoria != NULL)
+    *ultimoNum = limite;
+    removeMemoria(raiz, valorRemove);
+}
+
+void modificarNo(Memoria **raiz, Memoria *no, Info *info, int quant)
+{
+    Memoria *menor;
+    Info *menorValor;
+
+    menor = buscaMenorBloco(raiz, no, info, &menorValor);
+
+    if (quant < avaliarQuant(*info))
     {
-        if (memoria->info1 != NULL && memoria->info1->inicio == inicio && memoria->info1->fim == fim)
-            memoria->info1->status = 1;
+        if (menor == NULL)
+        {
+            Info Info;
+            Info.inicio = info->inicio;
+            Info.fim = info->inicio + quant - 1;
+            Info.status = !(info->status);
 
-        if (memoria->info2 != NULL && memoria->info2->inicio == inicio && memoria->info2->fim == fim)
-            memoria->info2->status = 1;
+            info->inicio += quant;
+            insereMemoria(raiz, Info);
+        }
+        else
+        {
+            menorValor->fim += quant;
+            info->inicio += quant;
+        }
+    }
+    else
+    {
+        Memoria *maior;
+        Info *maiorValor;
 
-        freeEspaco(memoria->left, inicio, fim);
-        freeEspaco(memoria->center, inicio, fim);
-        freeEspaco(memoria->right, inicio, fim);
+        maior = buscaMaiorBloco(raiz, no, info, &maiorValor);
+
+        if (menor == NULL && maior == NULL)
+            info->status = !(info->status);
+        else
+        {
+            if (menor == NULL)
+            {
+                info->status = !(info->status);
+                concatenaNo(raiz, &(info->fim), maiorValor->fim, maiorValor->inicio);
+            }
+            else if (maior == NULL)
+                concatenaNo(raiz, &(menorValor->fim), info->fim, info->inicio);
+            else
+            {
+                int numero = maiorValor->inicio;
+                concatenaNo(raiz, &(menorValor->fim), maiorValor->fim, info->inicio);
+                removeMemoria(raiz, numero);
+            }
+        }
     }
 }
 
-void mergeNosInicio(Memoria **raiz, int *return_inicio)
+void alocarEDesalocar(Memoria **raiz, int quantNo, int status)
 {
-    if (raiz != NULL)
-    {
-        Memoria *atual = *raiz;
+    Info *info;
+    info = NULL;
+    Memoria *no;
+    no = buscaEspaco(raiz, quantNo, status, &info);
 
-        if (atual->info1 && atual->info2)
-        {
-            if (atual->info1->status == atual->info2->status &&
-                atual->info1->fim + 1 == atual->info2->inicio)
-            {
-                atual->info1->fim = atual->info2->fim;
-                atual->numKeys--;
-
-                *return_inicio = atual->info2->inicio;
-            }
-        }
-
-        if (atual->left && atual->info1 &&
-            atual->left->info2 &&
-            atual->left->info2->status == atual->info1->status &&
-            atual->left->info2->fim + 1 == atual->info1->inicio)
-        {
-            atual->left->info2->fim = atual->info1->fim;
-            atual->numKeys--;
-
-            *return_inicio = atual->info1->inicio;
-        }
-
-        if (atual->right && atual->info2 &&
-            atual->right->info1 &&
-            atual->info2->status == atual->right->info1->status &&
-            atual->info2->fim + 1 == atual->right->info1->inicio)
-        {
-            atual->info2->fim = atual->right->info1->fim;
-            atual->right->numKeys--;
-
-            *return_inicio = atual->info2->inicio;
-        }
-
-        if (atual->left)
-            mergeNosInicio(&atual->left, return_inicio);
-        else if (atual->center)
-            mergeNosInicio(&atual->center, return_inicio);
-        else if (atual->right)
-            mergeNosInicio(&atual->right, return_inicio);
-    }
-}
-
-// ============================
-// HARD CODING TÁ ERRADO NÃO PEGUEM
-void mergeNosMeio(Memoria **raiz, int *aux1, int *aux2)
-{
-    if (raiz != NULL && *raiz != NULL)
-    {
-        Memoria *atual = *raiz;
-
-        if (atual->info1 && atual->info2)
-        {
-            if (atual->info1->status == atual->info2->status &&
-                atual->info1->fim + 1 == atual->info2->inicio)
-            {
-                *aux1 = atual->info1->inicio;
-                *aux2 = atual->info2->inicio;
-            }
-            if (atual->info1->fim < atual->info2->fim && atual->info1->status == atual->info2->status)
-                atual->info1->fim = atual->info2->fim;
-        }
-
-        if (atual->left)
-            mergeNosMeio(&atual->left, aux1, aux2);
-
-        if (atual->center)
-            mergeNosMeio(&atual->center, aux1, aux2);
-
-        if (atual->right)
-            mergeNosMeio(&atual->right, aux1, aux2);
-    }
-}
-
-void mergeNosFim(Memoria **raiz, int *return_inicio)
-{
-    if (raiz != NULL)
-    {
-        Memoria *atual = *raiz;
-
-        if (atual->info2 && atual->right)
-        {
-            if (atual->info2->status == atual->right->info1->status &&
-                atual->info2->fim + 1 == atual->right->info1->inicio)
-            {
-                atual->info2->fim = atual->right->info1->fim;
-                atual->right->numKeys--;
-                *return_inicio = atual->right->info1->inicio;
-            }
-        }
-
-        if (atual->left && atual->info1)
-        {
-            if (atual->left->info2->status == atual->info1->status &&
-                atual->left->info2->fim + 1 == atual->info1->inicio)
-            {
-                atual->left->info2->fim = atual->info1->fim;
-                atual->numKeys--;
-
-                *return_inicio = atual->info1->inicio;
-            }
-        }
-
-        if (atual->left)
-            mergeNosFim(&atual->left, return_inicio);
-        else if (atual->center)
-            mergeNosFim(&atual->center, return_inicio);
-        else if (atual->right)
-            mergeNosFim(&atual->right, return_inicio);
-    }
+    if (info != NULL)
+        modificarNo(raiz, no, info, quantNo);
+    else
+        printf("\nNão há espaço disponível\n");
 }
 
 void no23free(Memoria **no)
@@ -522,22 +547,7 @@ Memoria *no23Juntar(Memoria *filho1, Info info, Memoria *maior, Memoria **raiz)
     return (filho1);
 }
 
-static int ehInfo1(Memoria no, int info)
-{
-    return (info == no.info1->inicio);
-}
-
-static int ehInfo2(Memoria no, int info)
-{
-    return (no.numKeys == 2 && info == no.info2->inicio);
-}
-
-static Info no23MaiorInfo(Memoria *raiz)
-{
-    return (raiz->numKeys == 2 ? *(raiz->info2) : *(raiz->info1));
-}
-
-static Memoria *buscaMenorFilho(Memoria *raiz, Memoria **pai)
+Memoria *buscaMenorFilho(Memoria *raiz, Memoria **pai)
 {
     Memoria *filho;
     filho = raiz;
@@ -551,27 +561,32 @@ static Memoria *buscaMenorFilho(Memoria *raiz, Memoria **pai)
     return (filho);
 }
 
-static Memoria *buscaMaiorFilho(Memoria *raiz, Memoria **pai, Info *maiorInfo)
+Info *no23MaiorInfo(Memoria *raiz)
+{
+    return (raiz->numKeys == 2 ? raiz->info2 : raiz->info1);
+}
+
+Memoria *buscaMaiorFilho(Memoria *raiz, Memoria **pai, Info **maior_valor)
 {
     Memoria *filho;
     filho = raiz;
 
-    while (!ehFolha(filho))
+    while(!ehFolha(filho))
     {
         *pai = filho;
-        if (filho->numKeys == 1)
+        if(filho->numKeys == 1)
             filho = filho->center;
         else
             filho = filho->right;
     }
 
-    if (filho != NULL)
-        *maiorInfo = no23MaiorInfo(filho);
+    if(filho != NULL)
+        *maior_valor = no23MaiorInfo(filho);
 
-    return (filho);
+    return filho;
 }
 
-static Memoria *buscaNoPai(Memoria *raiz, int info)
+Memoria *buscaNoPai(Memoria *raiz, int info)
 {
     Memoria *pai;
     pai = NULL;
@@ -595,7 +610,7 @@ static Memoria *buscaNoPai(Memoria *raiz, int info)
     return (pai);
 }
 
-static Memoria *buscaMaiorNoPai(Memoria *raiz, int info)
+Memoria *buscaMaiorNoPai(Memoria *raiz, int info)
 {
     Memoria *pai;
     pai = NULL;
@@ -612,30 +627,6 @@ static Memoria *buscaMaiorNoPai(Memoria *raiz, int info)
                 pai = buscaMaiorNoPai(raiz->right, info);
 
             if (pai == NULL && ((raiz->numKeys == 1 && raiz->info1->inicio > info) || (raiz->numKeys == 2 && raiz->info2->inicio > info)))
-                pai = raiz;
-        }
-    }
-
-    return (pai);
-}
-
-static Memoria *buscaMenorNoPai(Memoria *raiz, int info)
-{
-    Memoria *pai;
-    pai = NULL;
-
-    if (raiz != NULL)
-    {
-        if (!ehInfo1(*raiz, info) && !ehInfo2(*raiz, info))
-        {
-            if (info < raiz->info1->inicio)
-                pai = buscaMenorNoPai(raiz->left, info);
-            else if (raiz->numKeys == 1 || info < raiz->info2->inicio)
-                pai = buscaMenorNoPai(raiz->center, info);
-            else
-                pai = buscaMenorNoPai(raiz->right, info);
-
-            if (pai == NULL && raiz->info1->inicio < info)
                 pai = raiz;
         }
     }
@@ -718,15 +709,14 @@ int removeMemoriaNaoFolha1(Memoria **origem, Memoria *raiz, Info *info, Memoria 
 {
     int remove;
     Memoria *filho, *pai;
-    Info info_filho;
+    Info *info_filho;
 
     pai = raiz;
-
     filho = buscaMaiorFilho(filho1, &pai, &info_filho);
 
     if (filho->numKeys == 2)
     {
-        *info = info_filho;
+        info = info_filho;
         filho->numKeys = 1;
     }
     else
@@ -738,11 +728,12 @@ int removeMemoriaNaoFolha1(Memoria **origem, Memoria *raiz, Info *info, Memoria 
     return (remove);
 }
 
+// Não mudei totalmente
 int removeMemoriaNaoFolha2(Memoria **origem, Memoria *raiz, Info *info, Memoria *filho1, Memoria *filho2, Memoria **maior)
 {
     int remove;
     Memoria *filho, *pai;
-    Info info_filho;
+    Info *info_filho;
 
     pai = raiz;
 
@@ -757,7 +748,7 @@ int removeMemoriaNaoFolha2(Memoria **origem, Memoria *raiz, Info *info, Memoria 
     else
     {
         filho = buscaMaiorFilho(filho2, &pai, &info_filho);
-        remove = MovimentoOnda(info_filho, info, pai, origem, &filho, maior, removeMemoria2);
+        remove = MovimentoOnda(*info_filho, info, pai, origem, &filho, maior, removeMemoria2);
     }
 
     return remove;
@@ -941,32 +932,32 @@ int removeMemoria(Memoria **raiz, int info)
 
     if (remove == -1)
     {
-        Info valorJuntar = no23MaiorInfo(posicaoJuntar); 
+        Info junctionValue = *no23MaiorInfo(posicaoJuntar);
         maior = NULL;
-        remove = rebalancearMemoria(raiz, valorJuntar.inicio, &maior);
+        remove = rebalancearMemoria(raiz, junctionValue.inicio, &maior);
 
         if (remove == -1)
         {
             Memoria *pai, *posicaoJuntar2;
             Info *input;
-            pai = buscaNoPai(*raiz, valorJuntar.inicio);
+            pai = buscaNoPai(*raiz, junctionValue.inicio);
 
-            if (ehInfo1(*posicaoJuntar, valorJuntar.inicio))
+            if (ehInfo1(*posicaoJuntar, junctionValue.inicio))
                 input = posicaoJuntar->center->info1;
             else
                 input = posicaoJuntar->right->info1;
 
-            remove = MovimentoOnda(valorJuntar, input, pai, raiz, &posicaoJuntar, &posicaoJuntar2, removeMemoria2);
+            remove = MovimentoOnda(junctionValue, input, pai, raiz, &posicaoJuntar, &posicaoJuntar2, removeMemoria2);
 
             if (remove == -1)
             {
-                valorJuntar = *(posicaoJuntar2->info1);
-                pai = buscaNoPai(*raiz, valorJuntar.inicio);
-                remove = MovimentoOnda(valorJuntar, posicaoJuntar2->left->info1, pai, raiz, &posicaoJuntar2, &posicaoJuntar, removeMemoria1);
+                junctionValue = *(posicaoJuntar2->info1);
+                pai = buscaNoPai(*raiz, junctionValue.inicio);
+                remove = MovimentoOnda(junctionValue, posicaoJuntar2->left->info1, pai, raiz, &posicaoJuntar2, &posicaoJuntar, removeMemoria1);
 
-                valorJuntar = no23MaiorInfo(posicaoJuntar);
+                junctionValue = *no23MaiorInfo(posicaoJuntar);
                 maior = NULL;
-                remove = rebalancearMemoria(raiz, valorJuntar.inicio, &maior);
+                remove = rebalancearMemoria(raiz, junctionValue.inicio, &maior);
             }
         }
 
