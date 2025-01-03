@@ -29,21 +29,11 @@ typedef struct ArvMemoria
 
 Info *criarInfo(int inicio, int fim, int status);
 
-Memoria *insereArv23(Memoria **no, Info *info, Info *promove, Memoria **noPai);
+Memoria *insereArv23(Memoria **raiz, Info info, Memoria *pai, Info *promove);
 
 void exibirInfos(Memoria *raiz);
 
-int alocaEspaco(Memoria **raiz, int quantEspaco, int *return_inicio);
-
-void freeEspaco(Memoria *memoria, int inicio, int fim);
-
 int removeMemoria(Memoria **raiz, int info);
-
-void mergeNosInicio(Memoria **raiz, int *return_inicio);
-
-void mergeNosMeio(Memoria **raiz, int *aux1, int *aux2);
-
-void mergeNosFim(Memoria **raiz, int *return_inicio);
 
 int removeMemoria1(Memoria **raiz, int info, Memoria *pai, Memoria **origem, Memoria **maior);
 
@@ -54,5 +44,19 @@ int rebalancearMemoria(Memoria **raiz, int info, Memoria **maior);
 void no23free(Memoria **no);
 
 Memoria *no23Juntar(Memoria *filho1, Info info, Memoria *maior, Memoria **raiz);
+
+void alocarEDesalocar(Memoria **raiz, int quantNo, int status);
+
+Memoria *buscaNoPai(Memoria *raiz, int info);
+
+void noAddInfo(Memoria *no, Info info, Memoria *maiorFilho);
+
+Memoria *buscaMaiorFilho(Memoria *raiz, Memoria **pai, Info **maior_valor);
+
+Memoria *buscaMenorFilho(Memoria *raiz, Memoria **pai);
+
+Memoria *buscaMaiorNoPai(Memoria *raiz, int info);
+
+Info *no23MaiorInfo(Memoria *raiz);
 
 #endif
