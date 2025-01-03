@@ -12,11 +12,6 @@
  * @return void
  */
 void menugeral(){
-    // #ifdef _WIN32
-    //     system("cls");
-    // #else
-    //     system("clear");
-    // #endif
     printf("                                          \n");
     printf("            M E N U   G E R A L           \n");
     printf("                                          \n");
@@ -39,11 +34,6 @@ void menugeral(){
  * @return void
  */
 void menuprincipal(){
-    // #ifdef _WIN32
-    //     system("cls");
-    // #else
-    //     system("clear");
-    // #endif
     printf("                                         \n");
     printf("       M E N U   P R I N C I P A L       \n");
     printf("                                         \n");
@@ -270,19 +260,21 @@ void metrificarbusca(){
     Arv23PT *raizMet = NULL;
     int i;
     char palavra[50];
+    double media = 0;
 
     preencher23(&raizMet);
 
-    inicio = clock();
     for(i = 0; i < 30; i++){
         int randNum = rand() % 1000;
         sprintf(palavra, "palavra%d", randNum);
+        inicio = clock();
         buscar23(raizMet, palavra);
+        fim = clock();
+        tempo = ((double)(fim - inicio) / CLOCKS_PER_SEC) / 30;
+        media += tempo;
     }
-    fim = clock();
 
-    tempo = ((double)(fim - inicio) / CLOCKS_PER_SEC) * 1000000 / 30;
-    printf("Tempo médio de busca: %f\n", tempo);
+    printf("Tempo médio de busca: %.9f\n", media);
 }
 
 /**
