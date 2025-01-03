@@ -126,7 +126,7 @@ int main() {
 
         do
         {
-            exibirPalavras(raiz);
+            // exibirPalavras(raiz);
             enc = 0;
             menu();
             scanf("%d", &op);

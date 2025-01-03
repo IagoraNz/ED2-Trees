@@ -5,6 +5,12 @@
 #include <time.h>
 #include "./src/Q1.h"
 
+/**
+ * @brief Função que exibe o menu geral
+ * 
+ * @param void
+ * @return void
+ */
 void menugeral(){
     // #ifdef _WIN32
     //     system("cls");
@@ -20,10 +26,18 @@ void menugeral(){
     printf(" Item IV. Remover palavra em português    \n");
     printf(" Item V. Metrificar busca                 \n");
     printf(" Item VI. Visualizar 2-3                  \n");
+    printf(" Item VII. Busca com caminho              \n");
+    printf(" Item VIII. Exibir palavra buscada        \n");
     printf(" 0. Sair do programa                      \n");
     printf("\n");
 }
 
+/**
+ * @brief Função que exibe o menu principal
+ * 
+ * @param void
+ * @return void
+ */
 void menuprincipal(){
     // #ifdef _WIN32
     //     system("cls");
@@ -52,6 +66,12 @@ void menuprincipal(){
     printf("\n");
 }
 
+/**
+ * @brief Função que preenche a árvore 2-3 com 100 palavras
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @return void
+ */
 void preencher23(Arv23PT **raiz) {
     Info infos[100];
     int i;
@@ -79,23 +99,171 @@ void preencher23(Arv23PT **raiz) {
     }
 }
 
+/**
+ * @brief Função que busca uma palavra em uma árvore 2-3
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @param palavra: palavra a ser buscada
+ * @return int: 1 se a palavra foi encontrada, 0 caso contrário
+ */
 int buscar23(Arv23PT *raiz, char *palavra){
     int enc = 0;
     if(raiz != NULL){
-        if(strcmp(palavra, raiz->info1.palavra) == 0)
+        enc |= buscar23(raiz->esq, palavra);
+
+        if(strcmp(raiz->info1.palavra, palavra) == 0)
             enc = 1;
-        else if(raiz->ninfos == 2 && strcmp(palavra, raiz->info2.palavra) == 0)
-            enc = 1;
-        else if(strcmp(palavra, raiz->info1.palavra) < 0)
-            enc = buscar23(raiz->esq, palavra);
-        else if(raiz->ninfos == 2 && strcmp(palavra, raiz->info2.palavra) < 0)
-            enc = buscar23(raiz->cen, palavra);
-        else
-            enc = buscar23(raiz->dir, palavra);
+
+        enc |= buscar23(raiz->cen, palavra);
+
+        if(raiz->ninfos == 2){
+            if(strcmp(raiz->info2.palavra, palavra) == 0)
+                enc = 1;
+            enc |= buscar23(raiz->dir, palavra);
+        }
     }
     return enc;
 }
 
+/**
+ * @brief Função que busca a fonte de uma palavra em uma árvore 2-3
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @param palavra: palavra a ser buscada
+ * @return Arv23PT*: nó da palavra
+ */
+Arv23PT *fontePalavra(Arv23PT **raiz, const char *palavra){
+    Arv23PT *aux = NULL;
+    if(raiz != NULL || *raiz != NULL){
+        if(strcmp((*raiz)->info1.palavra, palavra) == 0)
+            aux = *raiz;
+        else if((*raiz)->ninfos == 2 && strcmp((*raiz)->info2.palavra, palavra) == 0)
+            aux = *raiz;
+        else{
+            if(strcmp(palavra, (*raiz)->info1.palavra) < 0)
+                aux = fontePalavra(&(*raiz)->esq, palavra);
+            else if((*raiz)->ninfos == 1 || strcmp(palavra, (*raiz)->info2.palavra) < 0)
+                aux = fontePalavra(&(*raiz)->cen, palavra);
+            else
+                aux = fontePalavra(&(*raiz)->dir, palavra);
+        }
+    }
+
+    return aux;
+}
+
+/**
+ * @brief Função que exibe as palavras de uma unidade
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @param unidade: unidade a ser buscada
+ * @return int: 1 se a unidade foi encontrada, 0 caso contrário
+ */
+void exibirUnidades(Unidades *unidades){
+    if(unidades != NULL){
+        printf("%d ", unidades->unidade);
+        exibirUnidades(unidades->prox);
+    }
+}
+
+/**
+ * @brief Função que exibe as palavras de uma unidade
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @param unidade: unidade a ser buscada
+ * @return int: 1 se a unidade foi encontrada, 0 caso contrário
+ */
+void printarBST(IngPTBST *raiz){
+    if(raiz != NULL){
+        printarBST(raiz->esq);
+        printf("[ING] %s\n", raiz->info->palavra);
+        printf("[UNIDADES]\n");
+        exibirUnidades(raiz->info->unidades);
+        printarBST(raiz->dir);
+    }
+}
+
+/**
+ * @brief Função que exibe a informação buscada
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @param palavra: palavra a ser buscada
+ * @return void
+ */
+void mostrarBusca23ComCaminho(Arv23PT *raiz, const char *palavra){
+    Arv23PT *res = NULL;
+    if(raiz != NULL){
+        res = fontePalavra(&raiz, palavra);
+        if(res){
+            printf("[PT] %s\n", res->info1.palavra);
+            if(strcmp(res->info1.palavra, palavra) == 0)
+                printarBST(res->info1.versaoIng);
+            else
+                printarBST(res->info2.versaoIng);
+        }
+        else
+            printf("Palavra não encontrada!\n");
+    }
+}
+
+/**
+ * @brief Função que busca uma palavra em uma árvore 2-3
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @param palavra: palavra a ser buscada
+ * @param nivel: nível da árvore
+ * @return void
+ */
+void buscar23ComCaminho(Arv23PT *raiz, const char *palavra, int nivel) {
+    if (raiz == NULL) {
+        for (int i = 0; i < nivel; i++)
+            printf("  ");
+        printf("NULL\n");
+        return;
+    }
+
+    for (int i = 0; i < nivel; i++)
+        printf("  ");
+    if (raiz->ninfos == 1)
+        printf("[PT] %s\n", raiz->info1.palavra);
+    else
+        printf("[PT] %s - %s\n", raiz->info1.palavra, raiz->info2.palavra);
+
+    if ((raiz->ninfos >= 1 && strcmp(raiz->info1.palavra, palavra) == 0) ||
+        (raiz->ninfos == 2 && strcmp(raiz->info2.palavra, palavra) == 0)) {
+        for (int i = 0; i < nivel; i++)
+            printf("  ");
+        printf("Palavra encontrada: %s\n", palavra);
+        return;
+    }
+
+    if (strcmp(palavra, raiz->info1.palavra) < 0) {
+        for (int i = 0; i < nivel; i++)
+            printf("  ");
+        printf("[ESQ] -->\n");
+        buscar23ComCaminho(raiz->esq, palavra, nivel + 1);
+    } 
+    else if (raiz->ninfos == 2 && strcmp(palavra, raiz->info2.palavra) > 0) {
+        for (int i = 0; i < nivel; i++)
+            printf("  ");
+        printf("[DIR] -->\n");
+        buscar23ComCaminho(raiz->dir, palavra, nivel + 1);
+    } 
+    else{
+        for (int i = 0; i < nivel; i++)
+            printf("  ");
+        printf("[CEN] -->\n");
+        buscar23ComCaminho(raiz->cen, palavra, nivel + 1);
+    }
+}
+
+/**
+ * @brief Função que exibe as palavras de uma unidade
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @param unidade: unidade a ser buscada
+ * @return int: 1 se a unidade foi encontrada, 0 caso contrário
+ */
 void metrificarbusca(){
     clock_t inicio, fim;
     double tempo;
@@ -117,6 +285,12 @@ void metrificarbusca(){
     printf("Tempo médio de busca: %f\n", tempo);
 }
 
+/**
+ * @brief Função que exiber a árvore 2-3 em ordem
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @return void
+ */
 void exibirArv23EmOrdem(Arv23PT *raiz){
     if(raiz != NULL){
         exibirArv23EmOrdem(raiz->esq);
@@ -129,6 +303,13 @@ void exibirArv23EmOrdem(Arv23PT *raiz){
     }
 }
 
+/**
+ * @brief Função que insere uma palavra em uma árvore 2-3
+ * 
+ * @param raiz: raiz da árvore 2-3
+ * @param info: informação a ser inserida
+ * @return void
+ */
 void insere(Arv23PT **raiz, Info info){
     Info *promove = (Info*)malloc(sizeof(Info));
     Arv23PT *novaRaiz = inserirArv23(raiz, info, NULL, promove);
@@ -138,6 +319,13 @@ void insere(Arv23PT **raiz, Info info){
     printf("Inserção realizada com sucesso!\n");
 }
 
+/**
+ * @brief Função que realiza o ltrim em uma string, que consiste em
+ * remover espaços em branco do início de uma string
+ * 
+ * @param str: string a ser modificada
+ * @return void
+ */
 void ltrim(char *str){
     if(str != NULL && str[0] == ' ')
         memmove(str, str + 1, strlen(str)); 
@@ -195,16 +383,27 @@ int main(){
                 }
             }
         }
-        // Exibir a Árvore 2-3 em ordem
-        exibirArv23EmOrdem(raiz);
+
+        printf("Deseja exibir a árvore 2-3 em ordem? (s/n): ");
+        char esc;
+        scanf(" %c", &esc);
+        if(esc == 's')
+            exibirArv23EmOrdem(raiz);
+        printf("\n");
+        #ifdef _WIN32
+            system("PAUSE");
+        #else
+            system("read -p 'Pressione Enter para continuar...' var");
+        #endif
+        #ifdef _WIN32
+            system("cls");
+        #else
+            system("clear");
+        #endif
+        
         fclose(arquivo);
         int opc = -1, opc2 = -1, unidade = 0, enc = 0;
         char palavra[50];
-        // #ifdef _WIN32
-        //     system("PAUSE");
-        // #else
-        //     system("read -p 'Pressione Enter para continuar...' var");
-        // #endif
         while(opc != 2){
             menuprincipal();
             printf("Digite a opção desejada: ");
@@ -250,6 +449,16 @@ int main(){
                                 printf("\n\n");
                                 exibirArv23EmOrdem(raiz);
                                 break;
+                            case 7:
+                                printf("Digite a palavra em PT: ");
+                                scanf("%s", palavra);
+                                buscar23ComCaminho(raiz, palavra, 0);
+                                break;
+                            case 8:
+                                printf("Digite a palavra em PT: ");
+                                scanf("%s", palavra);
+                                mostrarBusca23ComCaminho(raiz, palavra);
+                                break;
                             case 0:
                                 printf("Saindo do menu geral...\n");
                                 exit(0);
@@ -258,11 +467,6 @@ int main(){
                                 printf("Opção inválida\n");
                                 break;
                         }
-                        // #ifdef _WIN32
-                        //     system("PAUSE");
-                        // #else
-                        //     system("read -p 'Pressione Enter para continuar...' var");
-                        // #endif
                     }while(opc2 != 0);
                     break;
                 case 2:

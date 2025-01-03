@@ -1,8 +1,23 @@
+/*-----------------------------------------------------------------------------------------------------*/
+
+/* Declaração das bibliotecas necessárias para a aplicação */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "../src/Q2.h"
 
+/*-----------------------------------------------------------------------------------------------------*/
+
+/* (pré-itens) funções necessárias para que os itens i, ii, iii e iv possam ocorrer */
+
+/**
+ * @brief Função que insere uma unidade em uma lista de unidades
+ * 
+ * @param unidades: lista de unidades
+ * @param unidade: unidade a ser inserida
+ * @return void
+ */
 void inserirunidade(Unidades **unidades, int unidade){
     if (*unidades == NULL){
         *unidades = (Unidades*)malloc(sizeof(Unidades));
@@ -13,6 +28,13 @@ void inserirunidade(Unidades **unidades, int unidade){
         inserirunidade(&(*unidades)->prox, unidade);
 }
 
+/**
+ * @brief Função que insere uma informação em uma árvore binária de busca
+ * 
+ * @param raiz: raiz da árvore binária de busca
+ * @param info: informação a ser inserida
+ * @return void
+ */
 void inserirArvBin(IngPTBST **raiz, InfoArvoreIngPTBST info){
     if(*raiz == NULL){
         *raiz = (IngPTBST*)malloc(sizeof(IngPTBST));
@@ -30,6 +52,13 @@ void inserirArvBin(IngPTBST **raiz, InfoArvoreIngPTBST info){
     }
 }
 
+/**
+ * @brief Função que cria um nó de uma árvore vermelho e preta
+ * 
+ * @param no: nó a ser criado
+ * @param info: informação a ser inserida no nó
+ * @return void
+ */
 void criarNo(ArvVP **no, InfoArvBin info){
     *no = (ArvVP*)malloc(sizeof(ArvVP));
     (*no)->info = info;
@@ -39,6 +68,12 @@ void criarNo(ArvVP **no, InfoArvBin info){
     (*no)->dir = NULL;
 }
 
+/**
+ * @brief Função que troca a cor de um nó
+ * 
+ * @param raiz: nó a ser trocado a cor
+ * @return void
+ */
 void trocaCor(ArvVP **raiz){
     (*raiz)->cor = !(*raiz)->cor;
     if ((*raiz)->esq != NULL)
@@ -47,26 +82,42 @@ void trocaCor(ArvVP **raiz){
         (*raiz)->dir->cor = !(*raiz)->dir->cor;
 }
 
-void rotacaoEsq(ArvVP **raiz)
-{
-  ArvVP *aux = (*raiz)->dir;
-  (*raiz)->dir = aux->esq;
-  aux->esq = *raiz;
-  aux->cor = (*raiz)->cor;
-  (*raiz)->cor = VERMELHO;
-  *raiz = aux;
+/**
+ * @brief Função que realiza uma rotação à esquerda
+ * 
+ * @param raiz: raiz da árvore
+ * @return void
+ */
+void rotacaoEsq(ArvVP **raiz){
+    ArvVP *aux = (*raiz)->dir;
+    (*raiz)->dir = aux->esq;
+    aux->esq = *raiz;
+    aux->cor = (*raiz)->cor;
+    (*raiz)->cor = VERMELHO;
+    *raiz = aux;
 }
 
-void rotacaoDir(ArvVP **raiz)
-{
-  ArvVP *aux = (*raiz)->esq;
-  (*raiz)->esq = aux->dir;
-  aux->dir = *raiz;
-  aux->cor = (*raiz)->cor;
-  (*raiz)->cor = VERMELHO;
-  *raiz = aux;
+/**
+ * @brief Função que realiza uma rotação à direita
+ * 
+ * @param raiz: raiz da árvore
+ * @return void
+ */
+void rotacaoDir(ArvVP **raiz){
+    ArvVP *aux = (*raiz)->esq;
+    (*raiz)->esq = aux->dir;
+    aux->dir = *raiz;
+    aux->cor = (*raiz)->cor;
+    (*raiz)->cor = VERMELHO;
+    *raiz = aux;
 }
 
+/**
+ * @brief Função que pega a cor de um nó
+ * 
+ * @param raiz: nó a ser verificado
+ * @return int: cor do nó
+ */
 int pegarCor(ArvVP *raiz){
     int cor = 1;
     if (raiz != NULL)
@@ -74,6 +125,12 @@ int pegarCor(ArvVP *raiz){
     return cor;
 }
 
+/**
+ * @brief Função que balanceia uma árvore vermelho e preta, realizando rotações e trocas de cor
+ * 
+ * @param raiz: raiz da árvore
+ * @return void
+ */
 void balancear(ArvVP **raiz){
     if (pegarCor((*raiz)->esq) == PRETO && pegarCor((*raiz)->dir) == VERMELHO)
         rotacaoEsq(raiz);
@@ -83,6 +140,13 @@ void balancear(ArvVP **raiz){
         trocaCor(raiz);
 }
 
+/**
+ * @brief Função que insere uma informação em uma árvore vermelho e preta
+ * 
+ * @param raiz: raiz da árvore
+ * @param info: informação a ser inserida
+ * @return int: 1 se a inserção foi bem sucedida, 0 caso contrário
+ */
 int inserirArvVP(ArvVP **raiz, InfoArvBin info){
     int inseriu = 0;
     if ((*raiz) == NULL){
@@ -104,11 +168,19 @@ int inserirArvVP(ArvVP **raiz, InfoArvBin info){
     }
     return inseriu;
 }
-/*
-(i) informar uma unidade e então imprima todas as palavras da unidade em português seguida das 
-equivalentes em inglês; 
-*/
 
+/*-----------------------------------------------------------------------------------------------------*/
+
+/* (i) informar uma unidade e então imprima todas as palavras da unidade em português seguida das 
+equivalentes em inglês;  */
+
+/**
+ * @brief Função que verifica se uma unidade está presente em uma lista de unidades
+ * 
+ * @param unidades: lista de unidades
+ * @param unidade: unidade a ser verificada
+ * @return int: 1 se a unidade está presente, 0 caso contrário
+ */
 int unidadePresente(Unidades *unidades, int unidade) {
     int resultado = 0;
     if (unidades != NULL) {
@@ -121,6 +193,13 @@ int unidadePresente(Unidades *unidades, int unidade) {
     return resultado;
 }
 
+/**
+ * @brief Função que exibe uma árvore binária de busca
+ * 
+ * @param raiz: raiz da árvore binária de busca
+ * @param unidade: unidade a ser exibida
+ * @return void
+ */
 void exibirArvBin(IngPTBST *raiz, int unidade) {
     if (raiz != NULL) {
         exibirArvBin(raiz->esq, unidade);
@@ -135,7 +214,13 @@ void exibirArvBin(IngPTBST *raiz, int unidade) {
     }
 }
 
-
+/**
+ * @brief Função que busca uma unidade em uma árvore binária de busca
+ * 
+ * @param raiz: raiz da árvore binária de busca
+ * @param unidade: unidade a ser buscada
+ * @return int: 1 se a unidade está presente, 0 caso contrário
+ */
 int buscarUnidade(IngPTBST *raiz, int unidade) {
     int encontrou = 0;
     if (raiz != NULL) {
@@ -151,26 +236,38 @@ int buscarUnidade(IngPTBST *raiz, int unidade) {
     return encontrou;
 }
 
+/**
+ * @brief Função que exibe uma unidade de uma árvore vermelho e preta
+ * 
+ * @param raiz: raiz da árvore vermelho e preta
+ * @param unidade: unidade a ser exibida
+ * @param enc: variável de controle
+ * @return void
+ */
 void exibirUnidade(ArvVP *raiz, int unidade, int *enc) {
     if (raiz != NULL) {
         exibirUnidade(raiz->esq, unidade, enc);
 
-        int encontrou = buscarUnidade(raiz->info.arvBinIngles, unidade);
-        if (encontrou) {
-            *enc = 1;
-            printf("%s\n", raiz->info.palavraPortugues);
-            exibirArvBin(raiz->info.arvBinIngles, unidade);
-            printf("\n");
-        }
+        *enc = 1;
+        printf("%s\n", raiz->info.palavraPortugues);
+        exibirArvBin(raiz->info.arvBinIngles, unidade);
+        printf("\n");
 
         exibirUnidade(raiz->dir, unidade, enc);
     }
 }
 
-/*
-(ii)informar uma palavra em português e então imprima todas as palavras em inglês equivalente a palavra em 
-português dada, independente da unidade; 
-*/
+/*-----------------------------------------------------------------------------------------------------*/
+
+/* (ii)informar uma palavra em português e então imprima todas as palavras em inglês equivalente a palavra em 
+português dada, independente da unidade;  */
+
+/**
+ * @brief Função que exibe as palavras em inglês de uma árvore binária de busca
+ * 
+ * @param raiz: raiz da árvore binária de busca
+ * @return void
+ */
 void exibirPalavrasIngles(IngPTBST *raiz){
     if(raiz != NULL){
         exibirPalavrasIngles(raiz->esq);
@@ -179,10 +276,17 @@ void exibirPalavrasIngles(IngPTBST *raiz){
     }
 }
 
+/**
+ * @brief Função que exibe uma árvore vermelho e preta
+ * 
+ * @param raiz: raiz da árvore vermelho e preta
+ * @param palavra: palavra a ser exibida
+ * @return void
+ */
 void exibirArvBinPT(ArvVP *raiz, char *palavra){
     if(raiz != NULL){
         exibirArvBinPT(raiz->esq, palavra);
-        if (strcmp(raiz->info.palavraPortugues, palavra) == 0){
+        if(strcmp(raiz->info.palavraPortugues, palavra) == 0){
             printf("Palavra PT-BR: %s\nPalavras EN:\n", raiz->info.palavraPortugues);
             exibirPalavrasIngles(raiz->info.arvBinIngles);
         }
@@ -190,15 +294,28 @@ void exibirArvBinPT(ArvVP *raiz, char *palavra){
     }
 }
 
-/*
-(iii)informar uma palavra em inglês e e a unidade a qual a mesma pertence remove-la das árvores binárias 
+/*-----------------------------------------------------------------------------------------------------*/
+
+/* (iii)informar uma palavra em inglês e e a unidade a qual a mesma pertence remove-la das árvores binárias 
 das quais ela pertence. Caso ela seja a única palavra em uma das árvores binárias, remover também da 
-árvore Rubro Negra. 
-*/
+árvore Rubro Negra. */
+
+/**
+ * @brief Função que verifica se um nó é folha de uma árvore binária de busca
+ * 
+ * @param raiz: raiz da árvore binária de busca
+ * @return int: 1 se o nó é folha, 0 caso contrário
+ */
 int ehfolha(IngPTBST *raiz){
     return (raiz->esq == NULL && raiz->dir == NULL);
 }
 
+/**
+ * @brief Função que verifica se um nó é um filho de uma árvore binária de busca
+ * 
+ * @param raiz: raiz da árvore binária de busca
+ * @return IngPTBST*: nó filho
+ */
 IngPTBST* soumfilho(IngPTBST *raiz){
     IngPTBST *aux;
     aux = NULL;
@@ -209,6 +326,12 @@ IngPTBST* soumfilho(IngPTBST *raiz){
     return aux;
 }
 
+/**
+ * @brief Função que busca o menor filho à esquerda da subárvore direita
+ * 
+ * @param raiz: raiz da árvore binária de busca
+ * @return IngPTBST*: menor filho
+ */
 IngPTBST* menorfilhoesq(IngPTBST *raiz){
     IngPTBST *aux;
     aux = NULL;
@@ -220,6 +343,13 @@ IngPTBST* menorfilhoesq(IngPTBST *raiz){
     return aux;
 }
 
+/**
+ * @brief Função que remove uma palavra de uma árvore binária de busca
+ * 
+ * @param raiz: raiz da árvore binária de busca
+ * @param palavra: palavra a ser removida
+ * @return int: 1 se a remoção foi bem sucedida, 0 caso contrário
+ */
 Unidades* removerUnidadeRecursivo(Unidades *unidades, int unidade, int *removido) {
     Unidades *prox = unidades;
     if (unidades != NULL) {
@@ -234,6 +364,14 @@ Unidades* removerUnidadeRecursivo(Unidades *unidades, int unidade, int *removido
     return prox;
 }
 
+/**
+ * @brief Função que remove uma palavra de uma árvore binária de busca
+ * 
+ * @param raiz: raiz da árvore binária de busca
+ * @param palavraEN: palavra em inglês a ser removida
+ * @param unidade: unidade a ser removida
+ * @return int: 1 se a remoção foi bem sucedida, 0 caso contrário
+ */
 int removerPalavraEN(IngPTBST **raiz, const char *palavraEN, int unidade){
     int encontrou = 0;
     if ((*raiz) != NULL){
@@ -266,6 +404,14 @@ int removerPalavraEN(IngPTBST **raiz, const char *palavraEN, int unidade){
     return encontrou;
 }
 
+/**
+ * @brief Função que percorre uma árvore vermelho e preta e remove uma palavra em inglês
+ * 
+ * @param raiz: raiz da árvore vermelho e preta
+ * @param palavraEN: palavra em inglês a ser removida
+ * @param unidade: unidade a ser removida
+ * @return void
+ */
 void percorrerArvVP(ArvVP **raiz, const char *palavraEN, int unidade, char palavrasPT[][50], int *remover, int *removerCount){
     if ((*raiz) != NULL){
         percorrerArvVP(&(*raiz)->esq, palavraEN, unidade, palavrasPT, remover, removerCount);
@@ -279,6 +425,12 @@ void percorrerArvVP(ArvVP **raiz, const char *palavraEN, int unidade, char palav
     }
 }
 
+/**
+ * @brief Função que move um nó para a esquerda e troca a cor
+ * 
+ * @param raiz: raiz da árvore vermelho e preta
+ * @return void
+ */
 void move2EsqRed(ArvVP **raiz){
     trocaCor(raiz);
     if (pegarCor((*raiz)->dir->esq) == VERMELHO){
@@ -288,6 +440,12 @@ void move2EsqRed(ArvVP **raiz){
     }
 }
 
+/**
+ * @brief Função que move um nó para a direita e troca a cor
+ * 
+ * @param raiz: raiz da árvore vermelho e preta
+ * @return void
+ */
 void move2DirRed(ArvVP **raiz){
     trocaCor(raiz);
     if (pegarCor((*raiz)->esq->esq) == VERMELHO){
@@ -296,6 +454,12 @@ void move2DirRed(ArvVP **raiz){
     }
 }
 
+/**
+ * @brief Função que procura o menor nó de uma árvore vermelho e preta
+ * 
+ * @param raiz: raiz da árvore vermelho e preta
+ * @return ArvVP*: menor nó
+ */
 ArvVP* procuraMenor(ArvVP *raiz) {
     ArvVP *no1 = raiz;
     ArvVP *no2 = raiz->esq;
@@ -306,6 +470,12 @@ ArvVP* procuraMenor(ArvVP *raiz) {
     return no1;
 }
 
+/**
+ * @brief Função que remove o menor nó de uma árvore vermelho e preta
+ * 
+ * @param raiz: raiz da árvore vermelho e preta
+ * @return void
+ */
 int removerMenor(ArvVP **raiz) {
     if (!(*raiz)->esq) {
         free(*raiz);
@@ -321,6 +491,13 @@ int removerMenor(ArvVP **raiz) {
     }
 }
 
+/**
+ * @brief Função que remove um nó de uma árvore vermelho e preta
+ * 
+ * @param raiz: raiz da árvore vermelho e preta
+ * @param palavraPT: palavra em português a ser removida
+ * @return int: 1 se a remoção foi bem sucedida, 0 caso contrário
+ */
 int removerArvVP(ArvVP **raiz, char *palavraPT) {
     int removido = 0;
     if (*raiz) {
@@ -354,6 +531,14 @@ int removerArvVP(ArvVP **raiz, char *palavraPT) {
     return removido;
 }
 
+/**
+ * @brief Função que remove uma palavra em inglês de uma árvore vermelho e preta
+ * 
+ * @param raiz: raiz da árvore vermelho e preta
+ * @param palavraEN: palavra em inglês a ser removida
+ * @param unidade: unidade a ser removida
+ * @return void
+ */
 void removerArvVPEN(ArvVP **raiz, const char *palavraEN, int unidade){
     char palavraPT[100][50];
     int remover = 0;
@@ -373,12 +558,20 @@ void removerArvVPEN(ArvVP **raiz, const char *palavraEN, int unidade){
         (*raiz)->cor = PRETO;
 }
 
-/*
-(iv)informar uma palavra em português e a unidade a qual a mesma pertence e então remove-la, para isto 
+/*-----------------------------------------------------------------------------------------------------*/
+
+/* (iv)informar uma palavra em português e a unidade a qual a mesma pertence e então remove-la, para isto 
 deve remover a palavra em inglês da árvore binária correspondente a palavra em português da mesma 
 unidade. Caso ela seja a única palavra na árvore binária, a palavra em português deve ser removida da 
-árvore Rubro Negra.  
-*/
+árvore Rubro Negra. */
+
+/**
+ * @brief Função que procura uma unidade em uma lista de unidades
+ * 
+ * @param unidades: lista de unidades
+ * @param unidade: unidade a ser procurada
+ * @return int: 1 se a unidade está presente, 0 caso contrário
+ */
 int procurarUnidade(Unidades *unidades, int unidade) {
     int encontrou = 0;
     if (unidades != NULL) {
@@ -390,6 +583,15 @@ int procurarUnidade(Unidades *unidades, int unidade) {
     return encontrou;
 }
 
+/**
+ * @brief Função que busca uma palavra em inglês em uma árvore binária de busca
+ * 
+ * @param raiz: raiz da árvore binária de busca
+ * @param unidade: unidade a ser buscada
+ * @param palavraEN: palavra em inglês a ser buscada
+ * @param encontrou: variável de controle
+ * @return void
+ */
 void buscarPalavraEN(IngPTBST *raiz, int unidade, char *palavraEN, int *encontrou) {
     if (raiz != NULL && *encontrou != 1) {
         buscarPalavraEN(raiz->esq, unidade, palavraEN, encontrou);
@@ -404,6 +606,14 @@ void buscarPalavraEN(IngPTBST *raiz, int unidade, char *palavraEN, int *encontro
     }
 }
 
+/**
+ * @brief Função que remove uma palavra em inglês de uma árvore binária de busca
+ * 
+ * @param raiz: raiz da árvore binária de busca
+ * @param palavraEN: palavra em inglês a ser removida
+ * @param unidade: unidade a ser removida
+ * @return int: 1 se a remoção foi bem sucedida, 0 caso contrário
+ */
 int percorrerArvVPPTBR(ArvVP **raiz, char *palavraPT, int unidade, int *remover) {
     if ((*raiz) != NULL) {
         if (strcmp(palavraPT, (*raiz)->info.palavraPortugues) == 0) {
@@ -429,6 +639,14 @@ int percorrerArvVPPTBR(ArvVP **raiz, char *palavraPT, int unidade, int *remover)
     return *remover;
 }
 
+/**
+ * @brief Função que remove uma palavra em português de uma árvore vermelho e preta
+ * 
+ * @param raiz: raiz da árvore vermelho e preta
+ * @param palavraPT: palavra em português a ser removida
+ * @param unidade: unidade a ser removida
+ * @return void
+ */
 void removerArvVPPTBR(ArvVP **raiz, char *palavraPT, int unidade) {
     int remover = 0;
     percorrerArvVPPTBR(raiz, palavraPT, unidade, &remover);
