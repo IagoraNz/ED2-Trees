@@ -25,27 +25,26 @@ void insere(ArvVP **raiz, InfoArvBin info) {
  * @return void
  */
 void preencherVP(ArvVP **raiz){
-    InfoArvBin info;
-    int i;
+    InfoArvBin info[1000];
+    int i, randNum = 0;
 
     srand(time(NULL));
 
-    for(i = 0; i < 100; i++){
-        info.palavraPortugues = (char *)malloc(50 * sizeof(char));
-        info.arvBinIngles = (IngPTBST *)malloc(sizeof(IngPTBST));
-        info.arvBinIngles->info.unidades = (Unidades *)malloc(sizeof(Unidades));
-        info.arvBinIngles->info.unidades->prox = NULL;
-        info.arvBinIngles->esq = NULL;
-        info.arvBinIngles->dir = NULL;
-        info.arvBinIngles->info.palavraIngles = (char *)malloc(50 * sizeof(char));
+    for(i = 0; i < 1000; i++){
+        info[i].palavraPortugues = (char *)malloc(50 * sizeof(char));
+        info[i].arvBinIngles = (IngPTBST *)malloc(sizeof(IngPTBST));
+        info[i].arvBinIngles->info.unidades = (Unidades *)malloc(sizeof(Unidades));
+        info[i].arvBinIngles->info.unidades->prox = NULL;
+        info[i].arvBinIngles->esq = NULL;
+        info[i].arvBinIngles->dir = NULL;
+        info[i].arvBinIngles->info.palavraIngles = (char *)malloc(50 * sizeof(char));
 
-        int randNum = rand() % 1000;
+        randNum++;
 
-        sprintf(info.palavraPortugues, "palavra%d", randNum);
-        sprintf(info.arvBinIngles->info.palavraIngles, "word%d", randNum);
-        info.arvBinIngles->info.unidades->unidade = rand() + 1;
-
-        insere(raiz, info);
+        sprintf(info[i].palavraPortugues, "palavra%d", randNum);
+        sprintf(info[i].arvBinIngles->info.palavraIngles, "palavra%d", randNum);
+        info[i].arvBinIngles->info.unidades->unidade = randNum + 1;
+        insere(raiz, info[i]);
     }
 }
 
@@ -80,22 +79,22 @@ void metrificarbusca(){
     clock_t inicio, fim;
     double tempo, media = 0;
     ArvVP *raizMet = NULL;
-    int i;
+    int i, randNum = 0;
     char palavra[50];
 
     preencherVP(&raizMet);
 
     for(i = 0; i < 30; i++){
-        int randNum = rand() % 1000;
+        randNum++;
         sprintf(palavra, "palavra%d", randNum);
         inicio = clock();
         buscarVP(raizMet, palavra);
         fim = clock();
-        tempo = ((double)(fim - inicio)) / CLOCKS_PER_SEC / 30;
+        tempo = ((double)(fim - inicio)) / CLOCKS_PER_SEC;
         media += tempo;
     }
 
-    printf("Tempo médio de busca: %.9f\n", media);
+    printf("Tempo médio de busca: %.8f\n", media / 30);
 }
 
 /**

@@ -63,12 +63,12 @@ void menuprincipal(){
  * @return void
  */
 void preencher23(Arv23PT **raiz) {
-    Info infos[100];
-    int i;
+    Info infos[1000];
+    int i, randNum = 0;
 
     srand(time(NULL));
 
-    for (i = 0; i < 100; i++) {
+    for (i = 0; i < 1000; i++) {
         Info *promove = (Info *)malloc(sizeof(Info));
         infos[i].palavra = (char *)malloc(50 * sizeof(char));
         infos[i].versaoIng = (IngPTBST *)malloc(sizeof(IngPTBST));
@@ -79,7 +79,7 @@ void preencher23(Arv23PT **raiz) {
         infos[i].versaoIng->esq = NULL;
         infos[i].versaoIng->dir = NULL;
 
-        int randNum = rand() % 1000;
+        randNum++;
 
         sprintf(infos[i].palavra, "palavra%d", randNum);
         sprintf(infos[i].versaoIng->info->palavra, "word%d", randNum);
@@ -99,18 +99,16 @@ void preencher23(Arv23PT **raiz) {
 int buscar23(Arv23PT *raiz, char *palavra){
     int enc = 0;
     if(raiz != NULL){
-        enc |= buscar23(raiz->esq, palavra);
-
         if(strcmp(raiz->info1.palavra, palavra) == 0)
             enc = 1;
-
-        enc |= buscar23(raiz->cen, palavra);
-
-        if(raiz->ninfos == 2){
-            if(strcmp(raiz->info2.palavra, palavra) == 0)
-                enc = 1;
-            enc |= buscar23(raiz->dir, palavra);
-        }
+        else if(raiz->ninfos == 2 && strcmp(raiz->info2.palavra, palavra) == 0)
+            enc = 1;
+        else if(strcmp(palavra, raiz->info1.palavra) < 0)
+            enc = buscar23(raiz->esq, palavra);
+        else if(raiz->ninfos == 1 || strcmp(palavra, raiz->info2.palavra) < 0)
+            enc = buscar23(raiz->cen, palavra);
+        else
+            enc = buscar23(raiz->dir, palavra);
     }
     return enc;
 }
@@ -256,25 +254,24 @@ void buscar23ComCaminho(Arv23PT *raiz, const char *palavra, int nivel) {
  */
 void metrificarbusca(){
     clock_t inicio, fim;
-    double tempo;
+    double tempo, media = 0;
     Arv23PT *raizMet = NULL;
-    int i;
+    int i, enc, randNum = 0;
     char palavra[50];
-    double media = 0;
 
     preencher23(&raizMet);
 
+    inicio = clock();
     for(i = 0; i < 30; i++){
-        int randNum = rand() % 1000;
+        randNum++;
         sprintf(palavra, "palavra%d", randNum);
-        inicio = clock();
-        buscar23(raizMet, palavra);
-        fim = clock();
-        tempo = ((double)(fim - inicio) / CLOCKS_PER_SEC) / 30;
-        media += tempo;
+        enc = buscar23(raizMet, palavra);
     }
+    fim = clock();
 
-    printf("Tempo médio de busca: %.9f\n", media);
+    tempo = ((double)(fim - inicio) / CLOCKS_PER_SEC);
+
+    printf("Tempo médio de busca: %.8f\n", tempo / 30);
 }
 
 /**
