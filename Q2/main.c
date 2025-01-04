@@ -90,11 +90,11 @@ void metrificarbusca(){
         inicio = clock();
         buscarVP(raizMet, palavra);
         fim = clock();
-        tempo = ((double)(fim - inicio)) / CLOCKS_PER_SEC;
+        tempo = ((double)(fim - inicio)) * 1000000 / CLOCKS_PER_SEC;
         media += tempo;
     }
 
-    printf("Tempo médio de busca: %.8f\n", media / 30);
+    printf("%.2f\n", media / 30);
 }
 
 /**
@@ -343,7 +343,9 @@ int main() {
                             case 3:
                                 printf("Digite a palavra em inglês a ser removida: ");
                                 scanf("%s", palavra);
-                                removerArvVP(&raiz, palavra);
+                                printf("Digite a unidade: ");
+                                scanf("%d", &unidade);
+                                removerArvVPEN(&raiz, palavra, unidade);
                                 break;
                             case 4:
                                 printf("Digite a palavra em português a ser removida: ");
@@ -351,7 +353,7 @@ int main() {
                                 removerArvVP(&raiz, palavra);
                                 break;
                             case 5:
-                                for(i = 0; i < 100; i++)
+                                for(i = 0; i < 30; i++)
                                     metrificarbusca();
                                 break;
                             case 6:
